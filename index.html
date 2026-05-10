@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un detalle para ti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --papiro-bg: #f2e3c9;
+            --rose-deep: #880e4f;
+            --accent: #d4a373;
+            --gold: #c5a059;
+        }
+
+        body {
+            background-color: #0f0f0f;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            font-family: 'Lora', serif;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Contenedor del Ramo Inicial */
+        #bouquet-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 1s ease;
+            z-index: 10;
+        }
+
+        .bouquet-wrapper {
+            position: relative;
+            max-width: 420px;
+            width: 85vw;
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .bouquet-wrapper:hover {
+            transform: scale(1.08) translateY(-15px);
+        }
+
+        .bouquet-img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 25px 60px rgba(136, 14, 79, 0.4));
+        }
+
+        /* Etiqueta flotante mejorada */
+        .note-tag {
+            position: absolute;
+            bottom: 12%;
+            right: -2%;
+            background: linear-gradient(135deg, #fff 0%, #fff9f0 100%);
+            padding: 15px 30px;
+            border-radius: 4px;
+            box-shadow: 15px 15px 40px rgba(0,0,0,0.6);
+            transform: rotate(8deg);
+            font-family: 'Dancing Script', cursive;
+            color: var(--rose-deep);
+            font-size: 1.6rem;
+            border-left: 6px solid var(--gold);
+            animation: float 4s infinite ease-in-out;
+            white-space: nowrap;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: rotate(8deg) translateY(0); }
+            50% { transform: rotate(10deg) translateY(-20px); }
+        }
+
+        /* Estilos de la Carta (Papiro) */
+        #letter-view {
+            display: none;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s ease-out;
+            width: 90%;
+            max-width: 700px;
+            margin: 40px 0;
+        }
+
+        .papyrus {
+            background-color: var(--papiro-bg);
+            background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+            padding: 5rem 3.5rem;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.9);
+            border: 1px solid #8d6e63;
+            position: relative;
+            border-radius: 4px;
+        }
+
+        .title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.8rem;
+            color: #5d4037;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .letter-content p {
+            color: #3e2723;
+            line-height: 1.9;
+            margin-bottom: 1.8rem;
+            text-align: justify;
+            font-size: 1.25rem;
+        }
+
+        .highlight {
+            color: var(--rose-deep);
+            font-weight: 700;
+            font-style: italic;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .signature {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.2rem;
+            text-align: right;
+            margin-top: 4rem;
+            color: #5d4037;
+        }
+
+        /* Partículas de pétalos */
+        .petal {
+            position: fixed;
+            top: -10%;
+            pointer-events: none;
+            z-index: 100;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Texto de instrucción inferior */
+        .instruction {
+            margin-top: 50px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            font-weight: 300;
+            animation: pulse 2.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.98); }
+            50% { opacity: 0.9; transform: scale(1.02); }
+        }
+
+        @media (max-width: 640px) {
+            .papyrus { padding: 3rem 1.8rem; }
+            .title { font-size: 2.8rem; }
+            .letter-content p { font-size: 1.15rem; }
+            .note-tag { font-size: 1.3rem; padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla 1: El Ramo -->
+    <div id="bouquet-view">
+        <div class="bouquet-wrapper" onclick="openLetter()">
+            <img src="https://png.pngtree.com/png-vector/20250127/ourmid/pngtree-flower-bouquet-transparent-png-image_15345222.png" 
+                 alt="Ramo de flores especial" 
+                 class="bouquet-img">
+            <div class="note-tag">Con todo mi amor... ❤️</div>
+        </div>
+        <p class="instruction">Toca para abrir</p>
+    </div>
+
+    <!-- Pantalla 2: La Carta -->
+    <div id="letter-view">
+        <article class="papyrus">
+            <h1 class="title">Para mi lugar favorito</h1>
+            
+            <div class="letter-content">
+                <p>Desde que estás en mi vida, cada día tiene un nuevo brillo, un nuevo color. No puedo imaginar mi mundo sin tu risa, tu paz y tu luz. Eres la razón por la que mi corazón se siente completo.</p>
+
+                <p>Es como si mi corazón hubiese pasado años esperando en silencio a alguien como tú, y cuando por fin apareciste, entendió que <span class="highlight">el amor verdadero sí existe</span>.</p>
+
+                <p>Te amo de una forma que no sé explicar por completo. Te amo en los momentos grandes, en las risas que me hacen olvidar el mundo, en las conversaciones eternas, en los abrazos que parecen hogar. Pero también te amo en lo simple: en tu voz cuando estás cansadita, en tu manera de mirarme, en esos pequeños detalles tuyos que para mí son magia pura.</p>
+
+                <p>Contigo aprendí que el amor no siempre necesita fuegos artificiales; a veces solo necesita una persona que te haga sentir paz incluso en los días difíciles. Y tú eres eso para mí: <span class="highlight">mi tranquilidad, mi refugio, mi lugar favorito en el mundo.</span></p>
+
+                <p>Quiero que sepas que admiro profundamente la persona que eres. Tu forma de querer, tu corazón, tu sensibilidad, tu fuerza… todo en ti tiene algo que me enamora más cada día. Incluso tus inseguridades me parecen hermosas, porque te hacen humana, real, única.</p>
+
+                <p>No sé qué nos depare la vida, pero sí sé algo con total certeza: quiero caminarla contigo. Quiero estar en tus días felices y también en los difíciles. Quiero celebrar tus logros, abrazarte cuando tengas miedo y recordarte siempre lo valiosa que eres.</p>
+
+                <p>Porque tú no eres solo alguien que amo. Eres la persona con la que mi alma se siente en casa.</p>
+
+                <p>Y si algún día dudas de cuánto significas para mí, vuelve a leer esto y recuerda que, entre millones de personas en el mundo, mi corazón te eligió a ti… y volvería a hacerlo una y mil veces más.</p>
+
+                <div class="signature">Te amo con todo mi ser ❤️</div>
+            </div>
+        </article>
+        
+        <button onclick="window.location.reload()" class="mt-12 block mx-auto text-stone-500 hover:text-stone-300 text-xs tracking-[0.3em] uppercase transition-colors pb-10">Volver al ramo</button>
+    </div>
+
+    <script>
+        function createPetal() {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            const icons = ['🌸', '✨', '🌹', '🤍', '🌷', '💖'];
+            petal.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+            petal.style.left = Math.random() * 100 + 'vw';
+            petal.style.fontSize = (Math.random() * 25 + 10) + 'px';
+            petal.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            petal.style.opacity = Math.random() * 0.8;
+            document.body.appendChild(petal);
+            setTimeout(() => petal.remove(), 7000);
+        }
+
+        function openLetter() {
+            const bView = document.getElementById('bouquet-view');
+            const lView = document.getElementById('letter-view');
+            
+            bView.style.opacity = '0';
+            bView.style.transform = 'scale(0.8) translateY(-50px)';
+            
+            setTimeout(() => {
+                bView.style.display = 'none';
+                lView.style.display = 'block';
+                
+                // Forzar reflujo para animación
+                lView.offsetHeight; 
+                
+                lView.style.opacity = '1';
+                lView.style.transform = 'translateY(0)';
+                
+                // Iniciar lluvia de pétalos con más frecuencia al inicio
+                for(let i=0; i<15; i++) {
+                    setTimeout(createPetal, i * 200);
+                }
+                setInterval(createPetal, 450);
+                
+                // Scroll automático al inicio de la carta
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 800);
+        }
+
+        // Algunos efectos sutiles al cargar
+        window.onload = () => {
+            for(let i=0; i<5; i++) {
+                setTimeout(createPetal, Math.random() * 2000);
+            }
+        };
+    </script>
+</body>
+</html>
