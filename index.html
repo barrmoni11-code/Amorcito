@@ -12,6 +12,7 @@
             --rose-deep: #880e4f;
             --accent: #d4a373;
             --gold: #c5a059;
+            --storm-blue: #2c3e50;
         }
 
         body {
@@ -21,70 +22,67 @@
             margin: 0;
             overflow-x: hidden;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        /* Contenedor del Ramo Inicial */
-        #bouquet-view {
+        #selection-view {
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 1s ease;
-            z-index: 10;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.8s ease;
         }
 
-        .bouquet-wrapper {
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 30px;
+        }
+
+        .gift-card {
             position: relative;
-            max-width: 420px;
-            width: 85vw;
             cursor: pointer;
             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(197, 160, 89, 0.2);
         }
 
-        .bouquet-wrapper:hover {
-            transform: scale(1.08) translateY(-15px);
+        .gift-card:hover {
+            transform: scale(1.05) translateY(-10px);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--gold);
         }
 
-        .bouquet-img {
+        .gift-img {
             width: 100%;
-            height: auto;
-            filter: drop-shadow(0 25px 60px rgba(136, 14, 79, 0.4));
+            height: 250px;
+            object-fit: contain;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.5));
+            margin-bottom: 15px;
         }
 
-        /* Etiqueta flotante mejorada */
-        .note-tag {
-            position: absolute;
-            bottom: 12%;
-            right: -2%;
-            background: linear-gradient(135deg, #fff 0%, #fff9f0 100%);
-            padding: 15px 30px;
-            border-radius: 4px;
-            box-shadow: 15px 15px 40px rgba(0,0,0,0.6);
-            transform: rotate(8deg);
+        .tag {
             font-family: 'Dancing Script', cursive;
-            color: var(--rose-deep);
-            font-size: 1.6rem;
-            border-left: 6px solid var(--gold);
-            animation: float 4s infinite ease-in-out;
-            white-space: nowrap;
+            color: var(--gold);
+            font-size: 1.5rem;
+            margin-top: 10px;
         }
 
-        @keyframes float {
-            0%, 100% { transform: rotate(8deg) translateY(0); }
-            50% { transform: rotate(10deg) translateY(-20px); }
-        }
-
-        /* Estilos de la Carta (Papiro) */
         #letter-view {
             display: none;
             opacity: 0;
             transform: translateY(30px);
-            transition: all 1.2s ease-out;
+            transition: all 1s ease-out;
             width: 90%;
-            max-width: 700px;
-            margin: 40px 0;
+            max-width: 750px;
+            margin: 40px auto;
         }
 
         .papyrus {
@@ -99,38 +97,35 @@
 
         .title {
             font-family: 'Great Vibes', cursive;
-            font-size: 3.8rem;
+            font-size: 3.5rem;
             color: #5d4037;
             text-align: center;
             margin-bottom: 2.5rem;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .letter-content p {
             color: #3e2723;
-            line-height: 1.9;
-            margin-bottom: 1.8rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
             text-align: justify;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
         }
 
         .highlight {
             color: var(--rose-deep);
             font-weight: 700;
             font-style: italic;
-            border-bottom: 2px solid var(--gold);
         }
 
         .signature {
             font-family: 'Great Vibes', cursive;
-            font-size: 3.2rem;
+            font-size: 3rem;
             text-align: right;
-            margin-top: 4rem;
+            margin-top: 3rem;
             color: #5d4037;
         }
 
-        /* Partículas de pétalos */
-        .petal {
+        .particle {
             position: fixed;
             top: -10%;
             pointer-events: none;
@@ -142,121 +137,152 @@
             to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* Texto de instrucción inferior */
-        .instruction {
-            margin-top: 50px;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            font-size: 0.85rem;
-            opacity: 0.8;
-            font-weight: 300;
-            animation: pulse 2.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; transform: scale(0.98); }
-            50% { opacity: 0.9; transform: scale(1.02); }
-        }
-
         @media (max-width: 640px) {
-            .papyrus { padding: 3rem 1.8rem; }
-            .title { font-size: 2.8rem; }
-            .letter-content p { font-size: 1.15rem; }
-            .note-tag { font-size: 1.3rem; padding: 10px 20px; }
+            .papyrus { padding: 3rem 1.5rem; }
+            .title { font-size: 2.5rem; }
+            .letter-content p { font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Pantalla 1: El Ramo -->
-    <div id="bouquet-view">
-        <div class="bouquet-wrapper" onclick="openLetter()">
-            <img src="https://png.pngtree.com/png-vector/20250127/ourmid/pngtree-flower-bouquet-transparent-png-image_15345222.png" 
-                 alt="Ramo de flores especial" 
-                 class="bouquet-img">
-            <div class="note-tag">Con todo mi amor... ❤️</div>
+    <div id="selection-view">
+        <h2 class="text-white text-3xl font-light tracking-widest mb-10 text-center opacity-80 uppercase">Elige un sentimiento</h2>
+        
+        <div class="gallery-container">
+            <!-- Opción 1: Ramo Original -->
+            <div class="gift-card" onclick="openLetter('amor')">
+                <img src="https://png.pngtree.com/png-vector/20250127/ourmid/pngtree-flower-bouquet-transparent-png-image_15345222.png" 
+                     alt="Ramo de flores" class="gift-img">
+                <div class="tag">Para mis días de luz ❤️</div>
+            </div>
+
+            <!-- Opción 2: Nubes y Tormenta -->
+            <div class="gift-card" onclick="openLetter('tormenta')">
+                <img src="https://static.vecteezy.com/system/resources/thumbnails/047/830/713/small_2x/dynamic-illustration-of-a-lightning-storm-within-a-dense-cloud-formation-showcasing-powerful-weather-elements-png.png" 
+                     alt="Nubes y Tormenta" class="gift-img">
+                <div class="tag">En nuestras tormentas ⛈️</div>
+            </div>
         </div>
-        <p class="instruction">Toca para abrir</p>
+        
+        <p class="mt-16 text-stone-500 text-xs tracking-widest animate-pulse uppercase">Selecciona una imagen para abrir</p>
     </div>
 
-    <!-- Pantalla 2: La Carta -->
     <div id="letter-view">
         <article class="papyrus">
-            <h1 class="title">¡Felices 7 Meses!</h1>
+            <h1 id="letter-title" class="title">Título de la Carta</h1>
             
-            <div class="letter-content">
-                <p>Para mi lugar favorito,</p>
-                
-                <p>Desde que estás en mi vida, cada día tiene un nuevo brillo, un nuevo color. No puedo imaginar mi mundo sin tu risa, tu paz y tu luz. Eres la razón por la que mi corazón se siente completo.</p>
-
-                <p>Es como si mi corazón hubiese pasado años esperando en silencio a alguien como tú, y cuando por fin apareciste, entendió que <span class="highlight">el amor verdadero sí existe</span>.</p>
-
-                <p>Te amo de una forma que no sé explicar por completo. Te amo en los momentos grandes, en las risas que me hacen olvidar el mundo, en las conversaciones eternas, en los abrazos que parecen hogar. Pero también te amo en lo simple: en tu voz cuando estás cansadita, en tu manera de mirarme, en esos pequeños detalles tuyos que para mí son magia pura.</p>
-
-                <p>Contigo aprendí que el amor no siempre necesita fuegos artificiales; a veces solo necesita una persona que te haga sentir paz incluso en los días difíciles. Y tú eres eso para mí: <span class="highlight">mi tranquilidad, mi refugio, mi lugar favorito en el mundo.</span></p>
-
-                <p>Quiero que sepas que admiro profundamente la persona que eres. Tu forma de querer, tu corazón, tu sensibilidad, tu fuerza… todo en ti tiene algo que me enamora más cada día. Incluso tus inseguridades me parecen hermosas, porque te hacen humana, real, única.</p>
-
-                <p>No sé qué nos depare la vida, pero sí sé algo con total certeza: quiero caminarla contigo. Quiero estar en tus días felices y también en los difíciles. Quiero celebrar tus logros, abrazarte cuando tengas miedo y recordarte siempre lo valiosa que eres.</p>
-
-                <p>Porque tú no eres solo alguien que amo. Eres la persona con la que mi alma se siente en casa.</p>
-
-                <p>Y si algún día dudas de cuánto significas para mí, vuelve a leer esto y recuerda que, entre millones de personas en el mundo, mi corazón te eligió a ti… y volvería a hacerlo una y mil veces más.</p>
-
-                <div class="signature">Te amo con todo mi ser ❤️</div>
+            <div id="letter-body" class="letter-content">
+                <!-- El contenido se inyectará dinámicamente -->
             </div>
+            
+            <div id="letter-signature" class="signature">Firma</div>
         </article>
         
-        <button onclick="window.location.reload()" class="mt-12 block mx-auto text-stone-500 hover:text-stone-300 text-xs tracking-[0.3em] uppercase transition-colors pb-10">Volver al ramo</button>
+        <button onclick="closeLetter()" class="mt-12 block mx-auto text-stone-500 hover:text-stone-300 text-xs tracking-[0.3em] uppercase transition-colors pb-10">Volver a la selección</button>
     </div>
 
     <script>
-        function createPetal() {
-            const petal = document.createElement('div');
-            petal.className = 'petal';
-            const icons = ['🌸', '✨', '🌹', '🤍', '🌷', '💖'];
-            petal.innerHTML = icons[Math.floor(Math.random() * icons.length)];
-            petal.style.left = Math.random() * 100 + 'vw';
-            petal.style.fontSize = (Math.random() * 25 + 10) + 'px';
-            petal.style.animationDuration = (Math.random() * 3 + 5) + 's';
-            petal.style.opacity = Math.random() * 0.8;
-            document.body.appendChild(petal);
-            setTimeout(() => petal.remove(), 7000);
+        const content = {
+            'amor': {
+                title: '¡Felices 7 Meses!',
+                particles: ['🌸', '✨', '🌹', '🤍', '🌷', '💖'],
+                body: `
+                    <p>Para mi lugar favorito,</p>
+                    <p>Desde que estás en mi vida, cada día tiene un nuevo brillo, un nuevo color. No puedo imaginar mi mundo sin tu risa, tu paz y tu luz. Eres la razón por la que mi corazón se siente completo.</p>
+                    <p>Contigo aprendí que el amor no siempre necesita fuegos artificiales; a veces solo necesita una persona que te haga sentir paz incluso en los días difíciles. Y tú eres eso para mí: <span class="highlight">mi tranquilidad, mi refugio, mi lugar favorito en el mundo.</span></p>
+                    <p>Porque tú no eres solo alguien que amo. Eres la persona con la que mi alma se siente en casa. Entre millones de personas en el mundo, mi corazón te eligió a ti… y volvería a hacerlo una y mil veces más.</p>
+                `,
+                signature: 'Te amo con todo mi ser ❤️'
+            },
+            'tormenta': {
+                title: 'En la Calma y en la Tormenta',
+                particles: ['⛈️', '💧', '⚡', '☁️', '💙', '🌈'],
+                body: `
+                    <p>Amor mío,</p>
+                    <p>Te escribo esta carta desde lo más profundo de mi corazón, con la necesidad de recordarte algo que jamás deberías dudar.</p>
+                    <p>Sé que a veces los días se vuelven difíciles. Sé que chocamos, que nos enojamos y que nuestras imperfecciones nos hacen discutir. En esos momentos, el ambiente se vuelve pesado y el silencio duele. Pero quiero que me mires, que me leas con el alma, y que recuerdes esto: <span class="highlight">ni la peor de nuestras discusiones va a cambiar un solo milímetro lo que siento por ti.</span></p>
+                    <p>Mi amor por ti no es un sentimiento pasajero que depende de que todo sea perfecto o de que siempre estemos de acuerdo. Te amo con tus luces y con tus sombras, te amo cuando nos reímos a carcajadas y te amo también cuando nos cuesta entendernos. El enojo es solo un momento, una nube que pasa, pero <span class="highlight">tú eres mi cielo entero.</span></p>
+                    <p>Cuando discutimos, mi mundo no se desarma; al contrario, me dan más ganas de abrazarte fuerte, de pedirte perdón o de perdonarte, y de recordarte que somos un equipo. No le temo a nuestras tormentas porque sé perfectamente con quién quiero ver salir el sol cada mañana.</p>
+                    <p>Quiero que sientas la absoluta paz de que, pase lo que pase, yo no me voy a ir. Mi compromiso contigo es inquebrantable y mi amor es eterno. Estar contigo es la decisión más hermosa y firme que he tomado en mi vida, y nada en este mundo va a cambiar eso.</p>
+                    <p>Te amo en la calma, te amo en la tormenta, hoy, mañana y para siempre.</p>
+                `,
+                signature: 'Tu amor eterno ❤️'
+            }
+        };
+
+        let particleInterval;
+
+        function createParticle(icons) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.fontSize = (Math.random() * 25 + 15) + 'px';
+            p.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            p.style.opacity = Math.random() * 0.7 + 0.3;
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 6000);
         }
 
-        function openLetter() {
-            const bView = document.getElementById('bouquet-view');
+        function openLetter(type) {
+            const data = content[type];
+            const sView = document.getElementById('selection-view');
             const lView = document.getElementById('letter-view');
             
-            bView.style.opacity = '0';
-            bView.style.transform = 'scale(0.8) translateY(-50px)';
+            // Inyectar contenido
+            document.getElementById('letter-title').innerText = data.title;
+            document.getElementById('letter-body').innerHTML = data.body;
+            document.getElementById('letter-signature').innerText = data.signature;
+
+            // Transición de salida
+            sView.style.opacity = '0';
+            sView.style.transform = 'scale(0.9)';
             
             setTimeout(() => {
-                bView.style.display = 'none';
+                sView.style.display = 'none';
                 lView.style.display = 'block';
                 
-                // Forzar reflujo para animación
+                // Forzar reflujo
                 lView.offsetHeight; 
                 
                 lView.style.opacity = '1';
                 lView.style.transform = 'translateY(0)';
                 
-                // Iniciar lluvia de pétalos con más frecuencia al inicio
-                for(let i=0; i<15; i++) {
-                    setTimeout(createPetal, i * 200);
-                }
-                setInterval(createPetal, 450);
+                // Iniciar partículas temáticas
+                clearInterval(particleInterval);
+                for(let i=0; i<10; i++) setTimeout(() => createParticle(data.particles), i * 150);
+                particleInterval = setInterval(() => createParticle(data.particles), 500);
                 
-                // Scroll automático al inicio de la carta
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 800);
         }
 
-        // Algunos efectos sutiles al cargar
+        function closeLetter() {
+            const sView = document.getElementById('selection-view');
+            const lView = document.getElementById('letter-view');
+            
+            lView.style.opacity = '0';
+            lView.style.transform = 'translateY(30px)';
+            
+            clearInterval(particleInterval);
+            
+            setTimeout(() => {
+                lView.style.display = 'none';
+                sView.style.display = 'flex';
+                
+                sView.offsetHeight;
+                
+                sView.style.opacity = '1';
+                sView.style.transform = 'scale(1)';
+            }, 800);
+        }
+
+        // Efecto inicial sutil
         window.onload = () => {
-            for(let i=0; i<5; i++) {
-                setTimeout(createPetal, Math.random() * 2000);
+            const initialIcons = ['✨', '🤍'];
+            for(let i=0; i<6; i++) {
+                setTimeout(() => createParticle(initialIcons), Math.random() * 2000);
             }
         };
     </script>
