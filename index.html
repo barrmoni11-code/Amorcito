@@ -2,17 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Un detalle para ti</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Un detalle para ti - Edición Reto</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --papiro-bg: #f2e3c9;
-            --rose-deep: #880e4f;
-            --accent: #d4a373;
             --gold: #c5a059;
-            --storm-blue: #2c3e50;
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fcf6ba, #aa771c);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
@@ -22,269 +22,457 @@
             margin: 0;
             overflow-x: hidden;
             min-height: 100vh;
+            color: #e5e5e5;
+            touch-action: manipulation;
         }
 
-        #selection-view {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-            transition: all 0.8s ease;
-        }
+        .font-script { font-family: 'Great Vibes', cursive; }
+        .font-hand { font-family: 'Dancing Script', cursive; }
 
-        .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-            width: 100%;
-            max-width: 900px;
-            margin-top: 30px;
-        }
+        .animate-fade { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .gift-card {
-            position: relative;
             cursor: pointer;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             background: rgba(255, 255, 255, 0.03);
             border-radius: 20px;
             padding: 20px;
             text-align: center;
             border: 1px solid rgba(197, 160, 89, 0.2);
         }
+        .gift-card:hover { transform: scale(1.05); border-color: var(--gold); }
 
-        .gift-card:hover {
-            transform: scale(1.05) translateY(-10px);
-            background: rgba(255, 255, 255, 0.07);
-            border-color: var(--gold);
-        }
-
-        .gift-img {
-            width: 100%;
-            height: 250px;
-            object-fit: contain;
-            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.5));
-            margin-bottom: 15px;
-        }
-
-        .tag {
-            font-family: 'Dancing Script', cursive;
-            color: var(--gold);
-            font-size: 1.5rem;
-            margin-top: 10px;
-        }
-
-        #letter-view {
-            display: none;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 1s ease-out;
-            width: 90%;
-            max-width: 750px;
-            margin: 40px auto;
-        }
+        .gift-img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; }
 
         .papyrus {
             background-color: var(--papiro-bg);
             background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
-            padding: 5rem 3.5rem;
+            padding: 3rem 2rem;
             box-shadow: 0 40px 80px rgba(0,0,0,0.9);
             border: 1px solid #8d6e63;
-            position: relative;
             border-radius: 4px;
-        }
-
-        .title {
-            font-family: 'Great Vibes', cursive;
-            font-size: 3.5rem;
-            color: #5d4037;
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .letter-content p {
             color: #3e2723;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            text-align: justify;
-            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .highlight {
-            color: var(--rose-deep);
-            font-weight: 700;
-            font-style: italic;
+        .highlight { color: #880e4f; font-weight: bold; border-bottom: 1px dashed #880e4f; }
+
+        .golden-ticket {
+            background: var(--gold-gradient);
+            padding: 3px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(191, 149, 63, 0.4);
+        }
+        .golden-ticket-inner {
+            background: #fffef2;
+            border: 2px dashed #bf953f;
+            border-radius: 12px;
+            padding: 25px;
         }
 
-        .signature {
-            font-family: 'Great Vibes', cursive;
-            font-size: 3rem;
-            text-align: right;
-            margin-top: 3rem;
-            color: #5d4037;
+        #game-canvas-area {
+            position: relative;
+            height: 250px;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--gold);
         }
 
-        .particle {
-            position: fixed;
-            top: -10%;
-            pointer-events: none;
-            z-index: 100;
-            animation: fall linear forwards;
+        #runner-player {
+            position: absolute;
+            bottom: 20px;
+            left: 50px;
+            font-size: 35px;
+            z-index: 20;
+            line-height: 1;
         }
 
-        @keyframes fall {
-            to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        .obstacle {
+            position: absolute;
+            bottom: 20px;
+            font-size: 30px;
+            z-index: 10;
+            line-height: 1;
         }
 
-        @media (max-width: 640px) {
-            .papyrus { padding: 3rem 1.5rem; }
-            .title { font-size: 2.5rem; }
-            .letter-content p { font-size: 1.1rem; }
+        #runner-floor {
+            position: absolute;
+            bottom: 18px;
+            width: 100%;
+            height: 2px;
+            background: var(--gold);
+            opacity: 0.5;
         }
+
+        .btn-premium { background: var(--gold); color: #0f0f0f; padding: 12px 24px; border-radius: 99px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; }
+        .btn-outline { border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 99px; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; }
+        
+        .memory-card { perspective: 1000px; aspect-ratio: 1/1; }
+        .memory-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; cursor: pointer; }
+        .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--gold); }
+        .card-back { background: #1a1a1a; color: var(--gold); }
+        .card-front { background: var(--gold); color: #000; transform: rotateY(180deg); font-size: 1.5rem; }
+
+        .particle { position: fixed; top: -10%; pointer-events: none; z-index: 100; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-    <div id="selection-view">
-        <h2 class="text-white text-3xl font-light tracking-widest mb-10 text-center opacity-80 uppercase">Elige un sentimiento mi amorcito</h2>
+    <!-- SELECCIÓN -->
+    <div id="view-selection" class="flex flex-col items-center justify-center min-h-screen py-10 animate-fade">
+        <h2 class="text-white text-3xl font-light tracking-widest mb-10 text-center opacity-80 uppercase font-serif">Elige un sentimiento mi amor</h2>
         
-        <div class="gallery-container">
-            <!-- Opción 1: Ramo Original -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
             <div class="gift-card" onclick="openLetter('amor')">
-                <img src="https://png.pngtree.com/png-vector/20250127/ourmid/pngtree-flower-bouquet-transparent-png-image_15345222.png" 
-                     alt="Ramo de flores" class="gift-img">
-                <div class="tag">Para mis días de luz ❤️</div>
+                <img src="https://png.pngtree.com/png-vector/20250127/ourmid/pngtree-flower-bouquet-transparent-png-image_15345222.png" alt="Flores" class="gift-img">
+                <div class="font-hand text-gold text-2xl">Para mis días de luz ❤️</div>
             </div>
 
-            <!-- Opción 2: Nubes y Tormenta -->
             <div class="gift-card" onclick="openLetter('tormenta')">
-                <img src="https://static.vecteezy.com/system/resources/thumbnails/047/830/713/small_2x/dynamic-illustration-of-a-lightning-storm-within-a-dense-cloud-formation-showcasing-powerful-weather-elements-png.png" 
-                     alt="Nubes y Tormenta" class="gift-img">
-                <div class="tag">En nuestras tormentas ⛈️</div>
+                <img src="https://static.vecteezy.com/system/resources/thumbnails/047/830/713/small_2x/dynamic-illustration-of-a-lightning-storm-within-a-dense-cloud-formation-showcasing-powerful-weather-elements-png.png" alt="Tormenta" class="gift-img">
+                <div class="font-hand text-blue-300 text-2xl">En nuestras tormentas ⛈️</div>
+            </div>
+
+            <div class="gift-card flex flex-col items-center justify-center" onclick="showView('view-games')">
+                <div class="text-7xl mb-4">🎁</div>
+                <div class="font-hand text-emerald-300 text-2xl">Juega y Gana ✨</div>
+                <p class="text-[10px] uppercase tracking-tighter opacity-50 mt-2">Gana un detalle especial</p>
             </div>
         </div>
-        
-        <p class="mt-16 text-stone-500 text-xs tracking-widest animate-pulse uppercase">Selecciona una imagen para abrir</p>
     </div>
 
-    <div id="letter-view">
+    <!-- CARTA -->
+    <div id="view-letter" class="w-full py-10 hidden animate-fade">
         <article class="papyrus">
-            <h1 id="letter-title" class="title">Título de la Carta</h1>
-            
-            <div id="letter-body" class="letter-content">
-                <!-- El contenido se inyectará dinámicamente -->
-            </div>
-            
-            <div id="letter-signature" class="signature">Firma</div>
+            <h1 id="l-title" class="font-script text-4xl text-center mb-6 text-[#5d4037]"></h1>
+            <div id="l-body" class="text-md space-y-4 leading-relaxed text-justify text-[#3e2723] font-serif"></div>
+            <div id="l-sig" class="font-script text-3xl text-right mt-8 text-[#5d4037]"></div>
         </article>
-        
-        <button onclick="closeLetter()" class="mt-12 block mx-auto text-stone-500 hover:text-stone-300 text-xs tracking-[0.3em] uppercase transition-colors pb-10">Volver a la selección</button>
+        <button onclick="showView('view-selection')" class="mt-10 block mx-auto btn-outline">Volver al inicio</button>
+    </div>
+
+    <!-- MENÚ JUEGOS -->
+    <div id="view-games" class="max-w-4xl mx-auto py-10 hidden animate-fade">
+        <button onclick="showView('view-selection')" class="mb-10 btn-outline flex items-center gap-2"><span>←</span> Volver</button>
+        <h2 class="font-script text-6xl text-gold text-center mb-12">Desafíos del Corazón</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div onclick="prepareGame('memory')" class="gift-card p-8">
+                <div class="text-5xl mb-4">🧩</div>
+                <h3 class="font-bold text-xl text-gold">Memoria</h3>
+            </div>
+            <div onclick="prepareGame('catch')" class="gift-card p-8">
+                <div class="text-5xl mb-4">❤️</div>
+                <h3 class="font-bold text-xl text-gold">Cosecha</h3>
+            </div>
+            <div onclick="prepareGame('runner')" class="gift-card p-8">
+                <div class="text-5xl mb-4">🏃</div>
+                <h3 class="font-bold text-xl text-gold">Salto de Amor</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARENA DE JUEGOS -->
+    <div id="view-arena" class="max-w-xl mx-auto py-10 hidden animate-fade text-center">
+        <div id="game-memory" class="game-container hidden">
+            <p class="text-xs mb-4 text-stone-400 uppercase tracking-widest">Intentos: <span id="mem-tries">15</span></p>
+            <div id="memory-grid" class="grid grid-cols-4 gap-2 max-w-sm mx-auto"></div>
+        </div>
+
+        <div id="game-catch" class="game-container hidden">
+            <div class="flex justify-between text-[10px] mb-4 text-stone-400 px-4">
+                <span>Puntos: <b id="catch-score">0</b>/15</span>
+                <span>Vidas: <b id="catch-lives" class="text-red-500">❤️❤️❤️</b></span>
+            </div>
+            <div id="game-canvas-area" class="catch-zone"><div id="catch-paddle" class="absolute bottom-4 h-3 w-20 bg-gold rounded-full"></div></div>
+        </div>
+
+        <div id="game-runner" class="game-container hidden">
+            <p class="text-[10px] mb-2 text-stone-400">Distancia: <b id="run-score">0</b>/1000m</p>
+            <div id="game-canvas-area" onclick="runnerJump()" class="cursor-pointer">
+                <div id="runner-floor"></div>
+                <div id="runner-player">🥰</div>
+            </div>
+            <p class="mt-4 text-[10px] text-stone-500 italic uppercase">¡Toca para saltar!</p>
+        </div>
+        <button onclick="showView('view-games')" class="mt-12 btn-outline opacity-40">Cerrar</button>
+    </div>
+
+    <!-- MODAL VICTORIA (DORADO PREMIUM) -->
+    <div id="modal-victory" class="fixed inset-0 z-[200] bg-black/95 hidden items-center justify-center p-6">
+        <div class="max-w-md w-full text-center">
+            <div class="text-7xl mb-6">🏆</div>
+            <h2 class="font-script text-5xl text-gold mb-8">¡Felicidades mi vida!</h2>
+            <div class="golden-ticket mb-8">
+                <div class="golden-ticket-inner">
+                    <h3 id="v-title" class="text-2xl font-bold text-[#2a1b0a] mb-2 uppercase tracking-tighter"></h3>
+                    <p id="v-desc" class="text-[#5d4037] text-sm italic font-serif"></p>
+                </div>
+            </div>
+            <button onclick="shareViaWhatsapp()" class="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold mb-4 shadow-lg uppercase tracking-widest text-xs">Reclamar Premio</button>
+            <button onclick="closeVictory()" class="btn-outline">Volver</button>
+        </div>
+    </div>
+
+    <div id="modal-gameover" class="fixed inset-0 z-[200] bg-black/90 hidden items-center justify-center p-6">
+        <div class="text-center">
+            <div class="text-8xl mb-6">💔</div>
+            <h2 class="font-script text-6xl text-red-500 mb-6">¡Casi!</h2>
+            <p class="text-stone-400 mb-8 italic">No te rindas mi amor, ¡tú puedes!</p>
+            <button onclick="showView('view-games')" class="btn-premium">Reintentar</button>
+        </div>
     </div>
 
     <script>
-        const content = {
-            'amor': {
-                title: '¡Felices 7 Meses!',
-                particles: ['🌸', '✨', '🌹', '🤍', '🌷', '💖'],
-                body: `
-                    <p>Para mi lugar favorito,</p>
-                    <p>Desde que estás en mi vida, cada día tiene un nuevo brillo, un nuevo color. No puedo imaginar mi mundo sin tu risa, tu paz y tu luz. Eres la razón por la que mi corazón se siente completo.</p>
-                    <p>Contigo aprendí que el amor no siempre necesita fuegos artificiales; a veces solo necesita una persona que te haga sentir paz incluso en los días difíciles. Y tú eres eso para mí: <span class="highlight">mi tranquilidad, mi refugio, mi lugar favorito en el mundo.</span></p>
-                    <p>Porque tú no eres solo alguien que amo. Eres la persona con la que mi alma se siente en casa. Entre millones de personas en el mundo, mi corazón te eligió a ti… y volvería a hacerlo una y mil veces más.</p>
-                `,
-                signature: 'Te amo con todo mi ser ❤️'
-            },
-            'tormenta': {
-                title: 'En la Calma y en la Tormenta',
-                particles: ['⛈️', '💧', '⚡', '☁️', '💙', '🌈'],
-                body: `
-                    <p>Amor mío,</p>
-                    <p>Te escribo esta carta desde lo más profundo de mi corazón, con la necesidad de recordarte algo que jamás deberías dudar.</p>
-                    <p>Sé que a veces los días se vuelven difíciles. Sé que chocamos, que nos enojamos y que nuestras imperfecciones nos hacen discutir. En esos momentos, el ambiente se vuelve pesado y el silencio duele. Pero quiero que me mires, que me leas con el alma, y que recuerdes esto: <span class="highlight">ni la peor de nuestras discusiones va a cambiar un solo milímetro lo que siento por ti.</span></p>
-                    <p>Mi amor por ti no es un sentimiento pasajero que depende de que todo sea perfecto o de que siempre estemos de acuerdo. Te amo con tus luces y con tus sombras, te amo cuando nos reímos a carcajadas y te amo también cuando nos cuesta entendernos. El enojo es solo un momento, una nube que pasa, pero <span class="highlight">tú eres mi cielo entero.</span></p>
-                    <p>Cuando discutimos, mi mundo no se desarma; al contrario, me dan más ganas de abrazarte fuerte, de pedirte perdón o de perdonarte, y de recordarte que somos un equipo. No le temo a nuestras tormentas porque sé perfectamente con quién quiero ver salir el sol cada mañana.</p>
-                    <p>Quiero que sientas la absoluta paz de que, pase lo que pase, yo no me voy a ir. Mi compromiso contigo es inquebrantable y mi amor es eterno. Estar contigo es la decisión más hermosa y firme que he tomado en mi vida, y nada en este mundo va a cambiar eso.</p>
-                    <p>Te amo en la calma, te amo en la tormenta, hoy, mañana y para siempre.</p>
-                `,
-                signature: 'Tu amor eterno ❤️'
-            }
-        };
+        const MI_NUMERO = "56921145330";
+        const vales = [
+          // --- Reconciliación y Arreglar Enojos ---
+    { t: "Paz de Oro 🤝", d: "Pausa automática en cualquier discusión. Nos damos un abrazo de 1 minuto y volvemos a hablar tranquilos." },
+    { t: "Tengo la Razón 🏆", d: "Ganas el argumento automáticamente, sin preguntas ni reclamos. Úsalo con sabiduría por esta vez." },
+    { t: "Borrón y Cuenta Nueva 🔄", d: "Dejamos el enojo atrás en este mismísimo instante y lo solucionamos con mimos y comida rica." },
+    { t: "Disculpa y un Antojo 🍫", d: "Válido para cuando yo tenga la culpa. Viene con una disculpa sincera y tu chocolate o comida favorita." },
+    { t: "Abrazo Rompe-Orgullo 🫂", d: "No importa qué tan enojados estemos, estás obligado/a a dejarte abrazar fuerte hasta que se nos pase." },
 
-        let particleInterval;
+    // --- Pasión y Contenido Adulto ---
+    { t: "Noche de Estreno 🔥", d: "Tú eliges la fantasía, la posición o el lugar hoy. Yo me entrego por completo a tus deseos." },
+    { t: "Ronda Relámpago ⚡", d: "Un 'rapidito' salvaje en el momento y lugar discreto que tú decidas." },
+    { t: "Masaje con Final Feliz 🤤", d: "Empieza relajante para quitar la tensión de la rutina... y termina de la manera más candente." },
+    { t: "Tú Mandas en la Cama 👑", d: "Esta noche llevas el control absoluto en la intimidad. Yo solo sigo tus instrucciones." },
+    { t: "Ducha para Dos 🧼", d: "Entramos juntos al baño y dejamos que el agua caliente y la pasión hagan lo suyo." },
+    { t: "Canje por un Striptease 🫦", d: "Un baile privado y muy sexy hecho especialmente para ti. Sin timidez, solo para tus ojos." },
 
-        function createParticle(icons) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.innerHTML = icons[Math.floor(Math.random() * icons.length)];
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.fontSize = (Math.random() * 25 + 15) + 'px';
-            p.style.animationDuration = (Math.random() * 3 + 4) + 's';
-            p.style.opacity = Math.random() * 0.7 + 0.3;
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 6000);
+    // --- Detalles y Vida Diaria ---
+    { t: "Desayuno a la Cama ☕", d: "Te despierto con el olorcito a café y tu desayuno favorito listo para disfrutar sin moverte de la cama." },
+    { t: "Pase Libre de Tareas 🧹", d: "Hoy me encargo yo de absolutamente todo lo que toque limpiar o hacer en la casa. Tú descansas." },
+    { t: "Vale por un Capricho 🛍️", d: "Válido para ir a ese lugar que tanto quieres o comprar ese antojo del que llevas días hablando." },
+    { t: "Escapada Espontánea 🚗", d: "Preparamos una mochila rápida y nos vamos a pasear a donde nos lleve el viento hoy mismo." }
+];
+
+        let gameLoop, activeItems = [], obstacles = [];
+        let isJumping = false, currentScore = 0, isGameWon = false;
+
+        function showView(viewId) {
+            document.querySelectorAll('[id^="view-"]').forEach(v => v.style.display = 'none');
+            const target = document.getElementById(viewId);
+            target.style.display = (viewId === 'view-selection' ? 'flex' : 'block');
+            
+            // Detener todo
+            clearInterval(gameLoop);
+            activeItems.forEach(i => i.remove());
+            obstacles.forEach(o => o.remove());
+            activeItems = []; obstacles = [];
+            isGameWon = false; // Resetear estado de victoria
+            
+            document.getElementById('modal-victory').classList.add('hidden');
+            document.getElementById('modal-gameover').classList.add('hidden');
+            document.getElementById('modal-victory').classList.remove('flex');
+            document.getElementById('modal-gameover').classList.remove('flex');
         }
 
         function openLetter(type) {
-            const data = content[type];
-            const sView = document.getElementById('selection-view');
-            const lView = document.getElementById('letter-view');
-            
-            // Inyectar contenido
-            document.getElementById('letter-title').innerText = data.title;
-            document.getElementById('letter-body').innerHTML = data.body;
-            document.getElementById('letter-signature').innerText = data.signature;
+            const content = {
+                'amor': { 
+                    title: '7 Meses a tu lado', 
+                    body: `
+                        <p>Desde que estás en mi vida, cada día tiene un nuevo brillo, un nuevo color. No puedo imaginar mi mundo sin tu risa, tu paz y tu luz. Eres la razón por la que mi corazón se siente completo.</p>
+                        <p>Es como si mi corazón hubiese pasado años esperando en silencio a alguien como tú, y cuando por fin apareciste, entendió que <span class="highlight">el amor verdadero sí existe</span>.</p>
+                        <p>Te amo de una forma que no sé explicar por completo. Te amo en los momentos grandes, en las risas que me hacen olvidar el mundo, en las conversaciones eternas, en los abrazos que parecen hogar. Pero también te amo en lo simple: en tu voz cuando estás cansadita, en tu manera de mirarme, en esos pequeños detalles tuyos que para mí son magia pura.</p>
+                        <p>Contigo aprendí que el amor no siempre necesita fuegos artificiales; a veces solo necesita una persona que te haga sentir paz incluso en los días difíciles. Y tú eres eso para mí: <span class="highlight">mi tranquilidad, mi refugio, mi lugar favorito en el mundo.</span></p>
+                        <p>Quiero que sepas que admiro profundamente la persona que eres. Tu forma de querer, tu corazón, tu sensibilidad, tu fuerza… todo en ti tiene algo que me enamora más cada día. Incluso tus inseguridades me parecen hermosas, porque te hacen humana, real, única.</p>
+                        <p>No sé qué nos depare la vida, pero sí sé algo con total certeza: quiero caminarla contigo. Quiero estar en tus días felices y también en los difíciles. Quiero celebrar tus logros, abrazarte cuando tengas miedo y recordarte siempre lo valiosa que eres.</p>
+                        <p>Porque tú no eres solo alguien que amo. Eres la persona con la que mi alma se siente en casa.</p>
+                        <p>Y si algún día dudas de cuánto significas para mí, vuelve a leer esto y recuerda que, entre millones de personas en el mundo, mi corazón te eligió a ti… y volvería a hacerlo una y mil veces más.</p>
+                    `, 
+                    sig: 'Te amo con todo mi ser ❤️' 
+                },
+                'tormenta': { 
+                    title: 'En la Calma y en la Tormenta', 
+                    body: `
+                        <p>Amor mío,</p>
+                        <p>Te escribo esta carta desde lo más profundo de mi corazón, con la necesidad de recordarte algo que jamás deberías dudar.</p>
+                        <p>Sé que a veces los días se vuelven difíciles. Sé que chocamos, que nos enojamos y que nuestras imperfecciones nos hacen discutir. En esos momentos, el ambiente se vuelve pesado y el silencio duele. Pero quiero que me mires, que me leas con el alma, y que recuerdes esto: <span class="highlight">ni la peor de nuestras discusiones va a cambiar un solo milímetro lo que siento por ti.</span></p>
+                        <p>Mi amor por ti no es un sentimiento pasajero que depende de que todo sea perfecto o de que siempre estemos de acuerdo. Te amo con tus luces y con tus sombras, te amo cuando nos reímos a carcajadas y te amo también cuando nos cuesta entendernos. El enojo es solo un momento, una nube que pasa, pero <span class="highlight">tú eres mi cielo entero.</span></p>
+                        <p>Cuando discutimos, mi mundo no se desarma; al contrario, me dan más ganas de abrazarte fuerte, de pedirte perdón o de perdonarte, y de recordarte que somos un equipo. No le temo a nuestras tormentas porque sé perfectamente con quién quiero ver salir el sol cada mañana.</p>
+                        <p>Quiero que sientas la absoluta paz de que, pase lo que pase, yo no me voy a ir. Mi compromiso contigo es inquebrantable y mi amor es eterno. Estar contigo es la decisión más hermosa y firme que he tomado en mi vida, y nada en este mundo va a cambiar eso.</p>
+                        <p>Te amo en la calma, te amo en la tormenta, hoy, mañana y para siempre.</p>
+                    `, 
+                    sig: 'Tu amor eterno ❤️' 
+                }
+            };
+            document.getElementById('l-title').innerText = content[type].title;
+            document.getElementById('l-body').innerHTML = content[type].body;
+            document.getElementById('l-sig').innerText = content[type].sig;
+            showView('view-letter');
+        }
 
-            // Transición de salida
-            sView.style.opacity = '0';
-            sView.style.transform = 'scale(0.9)';
-            
-            setTimeout(() => {
-                sView.style.display = 'none';
-                lView.style.display = 'block';
-                
-                // Forzar reflujo
-                lView.offsetHeight; 
-                
-                lView.style.opacity = '1';
-                lView.style.transform = 'translateY(0)';
-                
-                // Iniciar partículas temáticas
-                clearInterval(particleInterval);
-                for(let i=0; i<10; i++) setTimeout(() => createParticle(data.particles), i * 150);
-                particleInterval = setInterval(() => createParticle(data.particles), 500);
-                
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+        function prepareGame(gameId) {
+            showView('view-arena');
+            document.querySelectorAll('.game-container').forEach(v => v.classList.add('hidden'));
+            document.getElementById('game-' + gameId).classList.remove('hidden');
+            if(gameId === 'memory') startMemory();
+            else if(gameId === 'catch') startCatch();
+            else if(gameId === 'runner') startRunner();
+        }
+
+        function startMemory() {
+            let tries = 15; document.getElementById('mem-tries').innerText = tries;
+            const icons = ['💖','🌹','💎','🔥','💋','🍭','💖','🌹','💎','🔥','💋','🍭'].sort(()=>Math.random()-0.5);
+            const grid = document.getElementById('memory-grid'); grid.innerHTML = '';
+            let selected = [], solvedCount = 0;
+            icons.forEach(icon => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.innerHTML = `<div class="memory-card-inner"><div class="card-face card-back">?</div><div class="card-face card-front">${icon}</div></div>`;
+                card.onclick = () => {
+                    if (selected.length < 2 && !card.classList.contains('flipped') && !isGameWon) {
+                        card.classList.add('flipped'); selected.push({icon, el: card});
+                        if (selected.length === 2) {
+                            tries--; document.getElementById('mem-tries').innerText = tries;
+                            if (selected[0].icon === selected[1].icon) { 
+                                solvedCount++; selected = []; 
+                                if(solvedCount === 6) { isGameWon = true; setTimeout(win, 500); } 
+                            } else { 
+                                setTimeout(() => { selected.forEach(s => s.el.classList.remove('flipped')); selected = []; }, 600); 
+                            }
+                            if (tries <= 0 && solvedCount < 6 && !isGameWon) { setTimeout(gameOver, 700); }
+                        }
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function startCatch() {
+            let score = 0, lives = 3;
+            const arena = document.getElementById('game-catch').querySelector('#game-canvas-area');
+            const paddle = document.getElementById('catch-paddle');
+            const update = () => { document.getElementById('catch-score').innerText = score; document.getElementById('catch-lives').innerText = '❤️'.repeat(lives); };
+            const move = (e) => {
+                if(isGameWon) return;
+                const rect = arena.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 40;
+                paddle.style.left = Math.max(0, Math.min(x, arena.offsetWidth - 80)) + 'px';
+            };
+            arena.onmousemove = move; arena.ontouchmove = (e) => { e.preventDefault(); move(e); };
+            gameLoop = setInterval(() => {
+                if(isGameWon) return;
+                const h = document.createElement('div'); h.className = 'absolute text-2xl'; h.innerHTML = '❤️';
+                h.style.left = Math.random() * (arena.offsetWidth - 30) + 'px'; h.style.top = '-30px';
+                arena.appendChild(h); activeItems.push(h);
+                let pos = -30;
+                const fall = setInterval(() => {
+                    if(isGameWon) { h.remove(); clearInterval(fall); return; }
+                    pos += 5; h.style.top = pos + 'px';
+                    const hR = h.getBoundingClientRect(), pR = paddle.getBoundingClientRect();
+                    if (hR.bottom >= pR.top && hR.left < pR.right && hR.right > pR.left) { score++; update(); h.remove(); clearInterval(fall); if(score >= 15) { isGameWon = true; win(); } }
+                    else if (pos > arena.offsetHeight) { lives--; update(); h.remove(); clearInterval(fall); if(lives <= 0 && !isGameWon) gameOver(); }
+                    if (document.getElementById('view-arena').style.display === 'none') { h.remove(); clearInterval(fall); }
+                }, 20);
             }, 800);
         }
 
-        function closeLetter() {
-            const sView = document.getElementById('selection-view');
-            const lView = document.getElementById('letter-view');
+        function startRunner() {
+            currentScore = 0; obstacles = []; isJumping = false; isGameWon = false;
+            const arena = document.getElementById('game-runner').querySelector('#game-canvas-area');
+            const player = document.getElementById('runner-player');
+            player.style.bottom = "20px";
+            let lastObsTime = 0;
             
-            lView.style.opacity = '0';
-            lView.style.transform = 'translateY(30px)';
-            
-            clearInterval(particleInterval);
-            
-            setTimeout(() => {
-                lView.style.display = 'none';
-                sView.style.display = 'flex';
+            gameLoop = setInterval(() => {
+                if(isGameWon) return;
                 
-                sView.offsetHeight;
+                currentScore += 5; 
+                document.getElementById('run-score').innerText = currentScore;
                 
-                sView.style.opacity = '1';
-                sView.style.transform = 'scale(1)';
-            }, 800);
+                if(currentScore >= 1000) { 
+                    isGameWon = true;
+                    // Limpieza inmediata antes de mostrar victoria
+                    obstacles.forEach(o => o.remove());
+                    obstacles = [];
+                    win(); 
+                    return; 
+                }
+                
+                const now = Date.now();
+                if (now - lastObsTime > 1200 && Math.random() < 0.18) {
+                    const obs = document.createElement('div'); obs.className = 'obstacle';
+                    obs.innerHTML = ['👻','🌩️','🧱','💨'][Math.floor(Math.random()*4)];
+                    obs.style.left = arena.offsetWidth + 'px'; 
+                    arena.appendChild(obs); 
+                    obstacles.push(obs);
+                    lastObsTime = now;
+                    
+                    let oPos = arena.offsetWidth;
+                    const moveObs = setInterval(() => {
+                        if(isGameWon) { obs.remove(); clearInterval(moveObs); return; }
+                        
+                        oPos -= 7; 
+                        obs.style.left = oPos + 'px';
+                        
+                        const pR = player.getBoundingClientRect(), oR = obs.getBoundingClientRect();
+                        // Colisión
+                        if (pR.right > oR.left + 10 && pR.left < oR.right - 10 && pR.bottom > oR.top + 8) { 
+                            if(!isGameWon) gameOver(); 
+                            clearInterval(moveObs); 
+                        }
+                        
+                        if (oPos < -60) { obs.remove(); clearInterval(moveObs); }
+                        if (document.getElementById('view-arena').style.display === 'none') { obs.remove(); clearInterval(moveObs); }
+                    }, 20);
+                }
+            }, 50);
         }
 
-        // Efecto inicial sutil
-        window.onload = () => {
-            const initialIcons = ['✨', '🤍'];
-            for(let i=0; i<6; i++) {
-                setTimeout(() => createParticle(initialIcons), Math.random() * 2000);
+        function runnerJump() {
+            if (isJumping || isGameWon) return;
+            isJumping = true;
+            const player = document.getElementById('runner-player');
+            let h = 20, v = 15, g = 0.8;
+            const jumpInt = setInterval(() => {
+                if(isGameWon) { clearInterval(jumpInt); return; }
+                v -= g; h += v;
+                if (h <= 20) { h = 20; clearInterval(jumpInt); isJumping = false; }
+                player.style.bottom = h + 'px';
+            }, 20);
+        }
+
+        function win() {
+            clearInterval(gameLoop);
+            isGameWon = true; // Asegurar que todo se detenga
+            const v = vales[Math.floor(Math.random()*vales.length)];
+            document.getElementById('v-title').innerText = v.t;
+            document.getElementById('v-desc').innerText = v.d;
+            document.getElementById('modal-victory').classList.remove('hidden');
+            document.getElementById('modal-victory').classList.add('flex');
+            document.getElementById('modal-gameover').classList.add('hidden'); // Por si acaso
+        }
+
+        function gameOver() { 
+            if(isGameWon) return; // Evitar que el gameover salga si ya ganamos
+            clearInterval(gameLoop); 
+            document.getElementById('modal-gameover').classList.remove('hidden'); 
+            document.getElementById('modal-gameover').classList.add('flex'); 
+        }
+
+        function closeVictory() { showView('view-games'); }
+        function shareViaWhatsapp() {
+            const text = `*VALE DE AMOR RECLAMADO* 🎫\n\n🏆 ¡He ganado el desafío amor!\n\nPREMIO: ${document.getElementById('v-title').innerText}\nDETALLE: ${document.getElementById('v-desc').innerText}\n\nTe amo mucho ❤️`;
+            window.open(`https://wa.me/${MI_NUMERO}?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        setInterval(() => {
+            if (document.getElementById('view-selection').style.display !== 'none') {
+                const p = document.createElement('div'); p.className = 'particle';
+                p.innerHTML = ['✨','🤍','❤️'][Math.floor(Math.random()*3)];
+                p.style.left = Math.random()*100+'vw'; p.style.fontSize = Math.random()*20+10+'px';
+                p.style.animationDuration = Math.random()*3+2+'s';
+                document.body.appendChild(p); setTimeout(() => p.remove(), 4000);
             }
-        };
+        }, 1000);
     </script>
 </body>
 </html>
