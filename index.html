@@ -81,27 +81,26 @@
             border: 2px solid var(--gold);
         }
 
-        /* AJUSTE DEL JUGADOR CON SPRITE DE MARIO CORRIENDO */
+        /* CORRECCIÓN DE DIMENSIONES Y ENFOQUE EN LA HOJA DE SPRITES */
         #runner-player {
             position: absolute;
             bottom: 20px;
             left: 50px;
-            width: 40px;
-            height: 55px;
+            width: 50px;
+            height: 68px;
             background-image: url('https://github.com/barrmoni11-code/Amorcito/blob/main/amorcito1.png?raw=true');
             background-repeat: no-repeat;
-            background-size: 120px 55px;
+            /* La cuadrícula mide 5 columnas x 4 filas. Ajustamos el total del fondo de manera proporcional */
+            background-size: 250px 272px;
             z-index: 20;
             image-rendering: pixelated;
+            /* Cuadro inicial quieto en el suelo (Fila 4, Columna 1) */
+            background-position: 0px -204px;
         }
 
+        /* Obra fija: mantiene al personaje estable corriendo sin parpadeos */
         .running-animation {
-            animation: walkSprite 0.4s steps(3) infinite;
-        }
-
-        @keyframes walkSprite {
-            from { background-position: 0px 0px; }
-            to { background-position: -120px 0px; }
+            background-position: 0px -204px !important;
         }
 
         .obstacle {
@@ -123,7 +122,7 @@
 
         .btn-premium { background: var(--gold); color: #0f0f0f; padding: 12px 24px; border-radius: 99px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; }
         .btn-outline { border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 99px; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; }
-         
+          
         .memory-card { perspective: 1000px; aspect-ratio: 1/1; }
         .memory-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; cursor: pointer; }
         .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
@@ -131,7 +130,6 @@
         .card-back { background: #1a1a1a; color: var(--gold); }
         .card-front { background: var(--gold); color: #000; transform: rotateY(180deg); font-size: 1.5rem; }
 
-        /* ESTILOS PARA LA TRIVIA INTERACTIVA */
         .trivia-option {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(197, 160, 89, 0.3);
@@ -252,24 +250,35 @@
     <script>
         const MI_NUMERO = "56921145330";
         const vales = [
-            { t: "Paz de Oro 🤝", d: "Pausa automática en cualquier discusión. Nos damos un abrazo de 1 minuto y volvemos a hablar tranquilos." },
-            { t: "Tengo la Razón 🏆", d: "Ganas el argumento automáticamente, sin preguntas ni reclamos. Úsalo con sabiduría por esta vez." },
-            { t: "Borrón y Cuenta Nueva 🔄", d: "Dejamos el enojo atrás en este mismísimo instante y lo solucionamos con mimos y comida rica." },
-            { t: "Disculpa y un Antojo 🍫", d: "Válido para cuando yo tenga la culpa. Viene con una disculpa sincera y tu chocolate o comida favorita." },
-            { t: "Abrazo Rompe-Orgullo 🫂", d: "No importa qué tan enojados estemos, estás obligado/a a dejarte abrazar fuerte hasta que se nos pase." },
-            { t: "Noche de Estreno 🔥", d: "Tú eliges la fantasía, la posición o el lugar hoy. Yo me entrego por completo a tus deseos." },
-            { t: "Ronda Relámpago ⚡", d: "Un 'rapidito' salvaje en el momento y lugar discreto que tú decidas." },
-            { t: "Masaje con Final Feliz 🤤", d: "Empieza relajante para quitar la tensión de la rutina... y termina de la manera más candente." },
-            { t: "Tú Mandas en la Cama 👑", d: "Esta noche llevas el control absoluto en la intimidad. Yo solo sigo tus instrucciones." },
-            { t: "Ducha para Dos 🧼", d: "Entramos juntos al baño y dejamos que el agua caliente y la pasión hagan lo suyo." },
-            { t: "Canje por un Striptease 🫦", d: "Una Chupada. Con mucha hambre, hasta el culo con escupo incluido." },
-            { t: "Desayuno a la Cama ☕", d: "Te despierto con el olorcito a café y tu desayuno favorito listo para disfrutar sin moverte de la cama." },
-            { t: "Pase Libre de Tareas 🧹", d: "Hoy me encargo yo de absolutamente todo lo que toque limpiar o hacer en la casa. Tú descansas." },
-            { t: "Vale por un Capricho 🛍️", d: "Válido para ir a ese lugar que tanto quieres o comprar ese antojo del que llevas días hablando." },
-            { t: "Escapada Espontánea 🚗", d: "Preparamos una mochila rápida y nos vamos a pasear a donde nos lleve el viento hoy mismo." }
-        ];
+    // --- Originales ---
+    { t: "Cena Romántica", d: "Yo cocino lo que tú quieras, tú solo disfrutas y te dejas querer." },
+    { t: "Vale por 1 Masaje", d: "Sesión completa de relax para quitarte todo el cansancio." },
+    { t: "Tarde de Películas", d: "Tú eliges la serie o peli, yo pongo los snacks y los mimos." },
+    { t: "Vale por 1000 Besos", d: "Canjeable en cualquier momento, lugar y circunstancia." },
+    { t: "Día de Consentirte", d: "Un día entero donde tú mandas y yo te cumplo cada deseo." },
 
-        /* CONFIGURACIÓN DE LA TRIVIA ACTUALIZADA */
+    // --- Reconciliación y Arreglar Enojos ---
+    { t: "Paz de Oro 🤝", d: "Pausa automática en cualquier discusión. Nos damos un abrazo de 1 minuto y volvemos a hablar tranquilos." },
+    { t: "Tengo la Razón 🏆", d: "Ganas el argumento automáticamente, sin preguntas ni reclamos. Úsalo con sabiduría por esta vez." },
+    { t: "Borrón y Cuenta Nueva 🔄", d: "Dejamos el enojo atrás en este mismísimo instante y lo solucionamos con mimos y comida rica." },
+    { t: "Disculpa y un Antojo 🍫", d: "Válido para cuando yo tenga la culpa. Viene con una disculpa sincera y tu chocolate o comida favorita." },
+    { t: "Abrazo Rompe-Orgullo 🫂", d: "No importa qué tan enojados estemos, estás obligado/a a dejarte abrazar fuerte hasta que se nos pase." },
+
+    // --- Pasión y Contenido Adulto ---
+    { t: "Noche de Estreno 🔥", d: "Tú eliges la fantasía, la posición o el lugar hoy. Yo me entrego por completo a tus deseos." },
+    { t: "Ronda Relámpago ⚡", d: "Un 'rapidito' salvaje en el momento y lugar discreto que tú decidas." },
+    { t: "Masaje con Final Feliz 🤤", d: "Empieza relajante para quitar la tensión de la rutina... y termina de la manera más candente." },
+    { t: "Tú Mandas en la Cama 👑", d: "Esta noche llevas el control absoluto en la intimidad. Yo solo sigo tus instrucciones." },
+    { t: "Ducha para Dos 🧼", d: "Entramos juntos al baño y dejamos que el agua caliente y la pasión hagan lo suyo." },
+    { t: "Canje por una Chupada 🫦", d: "Una chupada intensa. Hasta el culo, con escupo incluido." },
+
+    // --- Detalles y Vida Diaria ---
+    { t: "Desayuno a la Cama ☕", d: "Te despierto con el olorcito a café y tu desayuno favorito listo para disfrutar sin moverte de la cama." },
+    { t: "Pase Libre de Tareas 🧹", d: "Hoy me encargo yo de absolutamente todo lo que toque limpiar o hacer en la casa. Tú descansas." },
+    { t: "Vale por un Capricho 🛍️", d: "Válido para ir a ese lugar que tanto quieres o comprar ese antojo del que llevas días hablando." },
+    { t: "Escapada Espontánea 🚗", d: "Preparamos una mochila rápida y nos vamos a pasear a donde nos lleve el viento hoy mismo." }
+];
+
         const preguntasTrivia = [
             {
                 q: "¿Qué serie de anime es mi favorita? 🤔",
@@ -288,7 +297,7 @@
             },
             {
                 q: "¿Que me gusta comer mas? 🤭",
-                options: ["Chocolate", "Pastelitos", "Tu Panocha", ";Lasaña"],
+                options: ["Chocolate", "Pastelitos", "Tu Panocha", "Lasaña"],
                 correct: 2
             },
             {
@@ -466,7 +475,7 @@
             player.style.bottom = "20px";
             
             player.classList.add('running-animation');
-            player.style.backgroundPosition = '0px 0px';
+            player.style.backgroundPosition = '0px -204px';
             
             let lastObsTime = 0;
             
@@ -513,13 +522,16 @@
             }, 50);
         }
 
+        /* MANEJO DE SALTO CON CAMBIO DE TEXTURA EXACTA */
         function runnerJump() {
             if (isJumping || isGameWon) return;
             isJumping = true;
             
             const player = document.getElementById('runner-player');
             player.classList.remove('running-animation');
-            player.style.backgroundPosition = '-80px 0px'; /* Usa cuadro estático al saltar */
+            
+            /* Cuadro del salto con brazos abiertos (Fila 3, última columna) */
+            player.style.backgroundPosition = '-200px -136px'; 
 
             let h = 20, v = 15, g = 0.8;
             const jumpInt = setInterval(() => {
@@ -530,7 +542,8 @@
                     clearInterval(jumpInt); 
                     isJumping = false; 
                     player.classList.add('running-animation');
-                    player.style.backgroundPosition = '0px 0px';
+                    /* Al caer, regresa al cuadro fijo de pie automáticamente */
+                    player.style.backgroundPosition = '0px -204px';
                 }
                 player.style.bottom = h + 'px';
             }, 20);
