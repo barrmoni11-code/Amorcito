@@ -81,13 +81,28 @@
             border: 2px solid var(--gold);
         }
 
+        /* CONFIGURACIÓN DEL NUEVO JUGADOR CON SPRITE */
         #runner-player {
             position: absolute;
             bottom: 20px;
             left: 50px;
-            font-size: 35px;
+            width: 63px;           /* Ancho aproximado de un solo cuadro */
+            height: 80px;          /* Alto aproximado de un solo cuadro */
+            background-image: url('https://github.com/barrmoni11-code/Amorcito/blob/main/amorcito.png?raw=true');
+            background-repeat: no-repeat;
+            background-size: 320px 320px; /* Tamaño total del mapa escalado */
             z-index: 20;
-            line-height: 1;
+            image-rendering: pixelated;   /* Mantiene el renderizado retro sin desenfoque */
+        }
+
+        /* Animación para correr (Usa la primera fila de la imagen) */
+        .running-animation {
+            animation: walkSprite 0.6s steps(5) infinite;
+        }
+
+        @keyframes walkSprite {
+            from { background-position: 0px 0px; }
+            to { background-position: -315px 0px; } /* Mueve horizontalmente por los 5 cuadros */
         }
 
         .obstacle {
@@ -109,7 +124,7 @@
 
         .btn-premium { background: var(--gold); color: #0f0f0f; padding: 12px 24px; border-radius: 99px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; }
         .btn-outline { border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 99px; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; }
-        
+         
         .memory-card { perspective: 1000px; aspect-ratio: 1/1; }
         .memory-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; cursor: pointer; }
         .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
@@ -123,7 +138,6 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- SELECCIÓN -->
     <div id="view-selection" class="flex flex-col items-center justify-center min-h-screen py-10 animate-fade">
         <h2 class="text-white text-3xl font-light tracking-widest mb-10 text-center opacity-80 uppercase font-serif">Elige un sentimiento mi amor</h2>
         
@@ -146,7 +160,6 @@
         </div>
     </div>
 
-    <!-- CARTA -->
     <div id="view-letter" class="w-full py-10 hidden animate-fade">
         <article class="papyrus">
             <h1 id="l-title" class="font-script text-4xl text-center mb-6 text-[#5d4037]"></h1>
@@ -156,7 +169,6 @@
         <button onclick="showView('view-selection')" class="mt-10 block mx-auto btn-outline">Volver al inicio</button>
     </div>
 
-    <!-- MENÚ JUEGOS -->
     <div id="view-games" class="max-w-4xl mx-auto py-10 hidden animate-fade">
         <button onclick="showView('view-selection')" class="mb-10 btn-outline flex items-center gap-2"><span>←</span> Volver</button>
         <h2 class="font-script text-6xl text-gold text-center mb-12">Desafíos del Corazón</h2>
@@ -176,7 +188,6 @@
         </div>
     </div>
 
-    <!-- ARENA DE JUEGOS -->
     <div id="view-arena" class="max-w-xl mx-auto py-10 hidden animate-fade text-center">
         <div id="game-memory" class="game-container hidden">
             <p class="text-xs mb-4 text-stone-400 uppercase tracking-widest">Intentos: <span id="mem-tries">15</span></p>
@@ -195,14 +206,13 @@
             <p class="text-[10px] mb-2 text-stone-400">Distancia: <b id="run-score">0</b>/1000m</p>
             <div id="game-canvas-area" onclick="runnerJump()" class="cursor-pointer">
                 <div id="runner-floor"></div>
-                <div id="runner-player">🥰</div>
+                <div id="runner-player" class="running-animation"></div>
             </div>
             <p class="mt-4 text-[10px] text-stone-500 italic uppercase">¡Toca para saltar!</p>
         </div>
         <button onclick="showView('view-games')" class="mt-12 btn-outline opacity-40">Cerrar</button>
     </div>
 
-    <!-- MODAL VICTORIA (DORADO PREMIUM) -->
     <div id="modal-victory" class="fixed inset-0 z-[200] bg-black/95 hidden items-center justify-center p-6">
         <div class="max-w-md w-full text-center">
             <div class="text-7xl mb-6">🏆</div>
@@ -230,27 +240,27 @@
     <script>
         const MI_NUMERO = "56921145330";
         const vales = [
-          // --- Reconciliación y Arreglar Enojos ---
-    { t: "Paz de Oro 🤝", d: "Pausa automática en cualquier discusión. Nos damos un abrazo de 1 minuto y volvemos a hablar tranquilos." },
-    { t: "Tengo la Razón 🏆", d: "Ganas el argumento automáticamente, sin preguntas ni reclamos. Úsalo con sabiduría por esta vez." },
-    { t: "Borrón y Cuenta Nueva 🔄", d: "Dejamos el enojo atrás en este mismísimo instante y lo solucionamos con mimos y comida rica." },
-    { t: "Disculpa y un Antojo 🍫", d: "Válido para cuando yo tenga la culpa. Viene con una disculpa sincera y tu chocolate o comida favorita." },
-    { t: "Abrazo Rompe-Orgullo 🫂", d: "No importa qué tan enojados estemos, estás obligado/a a dejarte abrazar fuerte hasta que se nos pase." },
+            // --- Reconciliación y Arreglar Enojos ---
+            { t: "Paz de Oro 🤝", d: "Pausa automática en cualquier discusión. Nos damos un abrazo de 1 minuto y volvemos a hablar tranquilos." },
+            { t: "Tengo la Razón 🏆", d: "Ganas el argumento automáticamente, sin preguntas ni reclamos. Úsalo con sabiduría por esta vez." },
+            { t: "Borrón y Cuenta Nueva 🔄", d: "Dejamos el enojo atrás en este mismísimo instante y lo solucionamos con mimos y comida rica." },
+            { t: "Disculpa y un Antojo 🍫", d: "Válido para cuando yo tenga la culpa. Viene con una disculpa sincera y tu chocolate o comida favorita." },
+            { t: "Abrazo Rompe-Orgullo 🫂", d: "No importa qué tan enojados estemos, estás obligado/a a dejarte abrazar fuerte hasta que se nos pase." },
 
-    // --- Pasión y Contenido Adulto ---
-    { t: "Noche de Estreno 🔥", d: "Tú eliges la fantasía, la posición o el lugar hoy. Yo me entrego por completo a tus deseos." },
-    { t: "Ronda Relámpago ⚡", d: "Un 'rapidito' salvaje en el momento y lugar discreto que tú decidas." },
-    { t: "Masaje con Final Feliz 🤤", d: "Empieza relajante para quitar la tensión de la rutina... y termina de la manera más candente." },
-    { t: "Tú Mandas en la Cama 👑", d: "Esta noche llevas el control absoluto en la intimidad. Yo solo sigo tus instrucciones." },
-    { t: "Ducha para Dos 🧼", d: "Entramos juntos al baño y dejamos que el agua caliente y la pasión hagan lo suyo." },
-    { t: "Canje por un Striptease 🫦", d: "Un baile privado y muy sexy hecho especialmente para ti. Sin timidez, solo para tus ojos." },
+            // --- Pasión y Contenido Adulto ---
+            { t: "Noche de Estreno 🔥", d: "Tú eliges la fantasía, la posición o el lugar hoy. Yo me entrego por completo a tus deseos." },
+            { t: "Ronda Relámpago ⚡", d: "Un 'rapidito' salvaje en el momento y lugar discreto que tú decidas." },
+            { t: "Masaje con Final Feliz 🤤", d: "Empieza relajante para quitar la tensión de la rutina... y termina de la manera más candente." },
+            { t: "Tú Mandas en la Cama 👑", d: "Esta noche llevas el control absoluto en la intimidad. Yo solo sigo tus instrucciones." },
+            { t: "Ducha para Dos 🧼", d: "Entramos juntos al baño y dejamos que el agua caliente y la pasión hagan lo suyo." },
+            { t: "Canje por una chupada 🫦", d: "Una Chupada con culo incluido. Con hambre y escupo." },
 
-    // --- Detalles y Vida Diaria ---
-    { t: "Desayuno a la Cama ☕", d: "Te despierto con el olorcito a café y tu desayuno favorito listo para disfrutar sin moverte de la cama." },
-    { t: "Pase Libre de Tareas 🧹", d: "Hoy me encargo yo de absolutamente todo lo que toque limpiar o hacer en la casa. Tú descansas." },
-    { t: "Vale por un Capricho 🛍️", d: "Válido para ir a ese lugar que tanto quieres o comprar ese antojo del que llevas días hablando." },
-    { t: "Escapada Espontánea 🚗", d: "Preparamos una mochila rápida y nos vamos a pasear a donde nos lleve el viento hoy mismo." }
-];
+            // --- Detalles y Vida Diaria ---
+            { t: "Desayuno a la Cama ☕", d: "Te despierto con el olorcito a café y tu desayuno favorito listo para disfrutar sin moverte de la cama." },
+            { t: "Pase Libre de Tareas 🧹", d: "Hoy me encargo yo de absolutamente todo lo que toque limpiar o hacer en la casa. Tú descansas." },
+            { t: "Vale por un Capricho 🛍️", d: "Válido para ir a ese lugar que tanto quieres o comprar ese antojo del que llevas días hablando." },
+            { t: "Escapada Espontánea 🚗", d: "Preparamos una mochila rápida y nos vamos a pasear a donde nos lleve el viento hoy mismo." }
+        ];
 
         let gameLoop, activeItems = [], obstacles = [];
         let isJumping = false, currentScore = 0, isGameWon = false;
@@ -380,6 +390,11 @@
             const arena = document.getElementById('game-runner').querySelector('#game-canvas-area');
             const player = document.getElementById('runner-player');
             player.style.bottom = "20px";
+            
+            // Forzar que empiece con la animación de correr
+            player.classList.add('running-animation');
+            player.style.backgroundPosition = '0px 0px';
+            
             let lastObsTime = 0;
             
             gameLoop = setInterval(() => {
@@ -390,7 +405,6 @@
                 
                 if(currentScore >= 1000) { 
                     isGameWon = true;
-                    // Limpieza inmediata antes de mostrar victoria
                     obstacles.forEach(o => o.remove());
                     obstacles = [];
                     win(); 
@@ -430,29 +444,44 @@
         function runnerJump() {
             if (isJumping || isGameWon) return;
             isJumping = true;
+            
             const player = document.getElementById('runner-player');
+            
+            // Quitamos la animación de correr para que no "camine rápido en el aire"
+            player.classList.remove('running-animation');
+            // Muestra estático un cuadro intermedio (el cuadro número 3 del salto de la segunda fila)
+            player.style.backgroundPosition = '-126px -80px'; 
+
             let h = 20, v = 15, g = 0.8;
             const jumpInt = setInterval(() => {
                 if(isGameWon) { clearInterval(jumpInt); return; }
                 v -= g; h += v;
-                if (h <= 20) { h = 20; clearInterval(jumpInt); isJumping = false; }
+                if (h <= 20) { 
+                    h = 20; 
+                    clearInterval(jumpInt); 
+                    isJumping = false; 
+                    
+                    // Al tocar el suelo, vuelve a activar la animación cíclica de correr
+                    player.classList.add('running-animation');
+                    player.style.backgroundPosition = '0px 0px';
+                }
                 player.style.bottom = h + 'px';
             }, 20);
         }
 
         function win() {
             clearInterval(gameLoop);
-            isGameWon = true; // Asegurar que todo se detenga
+            isGameWon = true; 
             const v = vales[Math.floor(Math.random()*vales.length)];
             document.getElementById('v-title').innerText = v.t;
             document.getElementById('v-desc').innerText = v.d;
             document.getElementById('modal-victory').classList.remove('hidden');
             document.getElementById('modal-victory').classList.add('flex');
-            document.getElementById('modal-gameover').classList.add('hidden'); // Por si acaso
+            document.getElementById('modal-gameover').classList.add('hidden'); 
         }
 
         function gameOver() { 
-            if(isGameWon) return; // Evitar que el gameover salga si ya ganamos
+            if(isGameWon) return; 
             clearInterval(gameLoop); 
             document.getElementById('modal-gameover').classList.remove('hidden'); 
             document.getElementById('modal-gameover').classList.add('flex'); 
