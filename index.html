@@ -72,16 +72,18 @@
             padding: 25px;
         }
 
-        #game-canvas-area {
+        #game-canvas-area, #snake-canvas-area {
             position: relative;
-            height: 250px;
             background: #000;
             border-radius: 20px;
             overflow: hidden;
             border: 2px solid var(--gold);
+            margin: 0 auto;
         }
 
-        /* CORRECCIÓN DE DIMENSIONES Y ENFOQUE EN LA HOJA DE SPRITES */
+        #game-canvas-area { height: 250px; }
+        #snake-canvas-area { width: 300px; height: 300px; display: block; }
+
         #runner-player {
             position: absolute;
             bottom: 20px;
@@ -90,18 +92,13 @@
             height: 68px;
             background-image: url('https://github.com/barrmoni11-code/Amorcito/blob/main/amorcito1.png?raw=true');
             background-repeat: no-repeat;
-            /* La cuadrícula mide 5 columnas x 4 filas. Ajustamos el total del fondo de manera proporcional */
             background-size: 250px 272px;
             z-index: 20;
             image-rendering: pixelated;
-            /* Cuadro inicial quieto en el suelo (Fila 4, Columna 1) */
             background-position: 0px -204px;
         }
 
-        /* Obra fija: mantiene al personaje estable corriendo sin parpadeos */
-        .running-animation {
-            background-position: 0px -204px !important;
-        }
+        .running-animation { background-position: 0px -204px !important; }
 
         .obstacle {
             position: absolute;
@@ -142,6 +139,10 @@
 
         .particle { position: fixed; top: -10%; pointer-events: none; z-index: 100; animation: fall linear forwards; }
         @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+
+        /* Controles Snake */
+        .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 150px; margin: 20px auto; }
+        .d-btn { background: rgba(197, 160, 89, 0.2); border: 1px solid var(--gold); color: var(--gold); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 20px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -180,18 +181,22 @@
     <div id="view-games" class="max-w-4xl mx-auto py-10 hidden animate-fade">
         <button onclick="showView('view-selection')" class="mb-10 btn-outline flex items-center gap-2"><span>←</span> Volver</button>
         <h2 class="font-script text-6xl text-gold text-center mb-12">Desafíos del Corazón</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div onclick="prepareGame('memory')" class="gift-card p-8">
-                <div class="text-5xl mb-4">🧩</div>
-                <h3 class="font-bold text-xl text-gold">Memoria</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div onclick="prepareGame('memory')" class="gift-card p-6">
+                <div class="text-4xl mb-3">🧩</div>
+                <h3 class="font-bold text-sm text-gold">Memoria</h3>
             </div>
-            <div onclick="prepareGame('trivia')" class="gift-card p-8">
-                <div class="text-5xl mb-4">📝</div>
-                <h3 class="font-bold text-xl text-gold">¿Cuánto me conoces?</h3>
+            <div onclick="prepareGame('trivia')" class="gift-card p-6">
+                <div class="text-4xl mb-3">📝</div>
+                <h3 class="font-bold text-sm text-gold">Trivia</h3>
             </div>
-            <div onclick="prepareGame('runner')" class="gift-card p-8">
-                <div class="text-5xl mb-4">🏃</div>
-                <h3 class="font-bold text-xl text-gold">Salto de Amor</h3>
+            <div onclick="prepareGame('runner')" class="gift-card p-6">
+                <div class="text-4xl mb-3">🏃</div>
+                <h3 class="font-bold text-sm text-gold">Salto</h3>
+            </div>
+            <div onclick="prepareGame('snake')" class="gift-card p-6">
+                <div class="text-4xl mb-3">🐍</div>
+                <h3 class="font-bold text-sm text-gold">Serpiente</h3>
             </div>
         </div>
     </div>
@@ -220,6 +225,18 @@
             </div>
             <p class="mt-4 text-[10px] text-stone-500 italic uppercase">¡Toca para saltar!</p>
         </div>
+
+        <div id="game-snake" class="game-container hidden">
+            <p class="text-[10px] mb-2 text-stone-400">Manzanas: <b id="snake-score">0</b>/20</p>
+            <canvas id="snake-canvas-area" width="300" height="300"></canvas>
+            <div class="d-pad">
+                <div></div><button class="d-btn" onclick="setSnakeDir(0, -1)">▲</button><div></div>
+                <button class="d-btn" onclick="setSnakeDir(-1, 0)">◀</button>
+                <button class="d-btn" onclick="setSnakeDir(0, 1)">▼</button>
+                <button class="d-btn" onclick="setSnakeDir(1, 0)">▶</button>
+            </div>
+        </div>
+
         <button onclick="showView('view-games')" class="mt-12 btn-outline opacity-40">Cerrar</button>
     </div>
 
@@ -250,66 +267,43 @@
     <script>
         const MI_NUMERO = "56921145330";
         const vales = [
-    // --- Originales ---
-    { t: "Cena Romántica", d: "Yo cocino lo que tú quieras, tú solo disfrutas y te dejas querer." },
-    { t: "Vale por 1 Masaje", d: "Sesión completa de relax para quitarte todo el cansancio." },
-    { t: "Tarde de Películas", d: "Tú eliges la serie o peli, yo pongo los snacks y los mimos." },
-    { t: "Vale por 1000 Besos", d: "Canjeable en cualquier momento, lugar y circunstancia." },
-    { t: "Día de Consentirte", d: "Un día entero donde tú mandas y yo te cumplo cada deseo." },
-
-    // --- Reconciliación y Arreglar Enojos ---
-    { t: "Paz de Oro 🤝", d: "Pausa automática en cualquier discusión. Nos damos un abrazo de 1 minuto y volvemos a hablar tranquilos." },
-    { t: "Tengo la Razón 🏆", d: "Ganas el argumento automáticamente, sin preguntas ni reclamos. Úsalo con sabiduría por esta vez." },
-    { t: "Borrón y Cuenta Nueva 🔄", d: "Dejamos el enojo atrás en este mismísimo instante y lo solucionamos con mimos y comida rica." },
-    { t: "Disculpa y un Antojo 🍫", d: "Válido para cuando yo tenga la culpa. Viene con una disculpa sincera y tu chocolate o comida favorita." },
-    { t: "Abrazo Rompe-Orgullo 🫂", d: "No importa qué tan enojados estemos, estás obligado/a a dejarte abrazar fuerte hasta que se nos pase." },
-
-    // --- Pasión y Contenido Adulto ---
-    { t: "Noche de Estreno 🔥", d: "Tú eliges la fantasía, la posición o el lugar hoy. Yo me entrego por completo a tus deseos." },
-    { t: "Ronda Relámpago ⚡", d: "Un 'rapidito' salvaje en el momento y lugar discreto que tú decidas." },
-    { t: "Masaje con Final Feliz 🤤", d: "Empieza relajante para quitar la tensión de la rutina... y termina de la manera más candente." },
-    { t: "Tú Mandas en la Cama 👑", d: "Esta noche llevas el control absoluto en la intimidad. Yo solo sigo tus instrucciones." },
-    { t: "Ducha para Dos 🧼", d: "Entramos juntos al baño y dejamos que el agua caliente y la pasión hagan lo suyo." },
-    { t: "Canje por una Chupada 🫦", d: "Una chupada intensa. Hasta el culo, con escupo incluido." },
-
-    // --- Detalles y Vida Diaria ---
-    { t: "Desayuno a la Cama ☕", d: "Te despierto con el olorcito a café y tu desayuno favorito listo para disfrutar sin moverte de la cama." },
-    { t: "Pase Libre de Tareas 🧹", d: "Hoy me encargo yo de absolutamente todo lo que toque limpiar o hacer en la casa. Tú descansas." },
-    { t: "Vale por un Capricho 🛍️", d: "Válido para ir a ese lugar que tanto quieres o comprar ese antojo del que llevas días hablando." },
-    { t: "Escapada Espontánea 🚗", d: "Preparamos una mochila rápida y nos vamos a pasear a donde nos lleve el viento hoy mismo." }
-];
+            { t: "Cena Romántica", d: "Yo cocino lo que tú quieras, tú solo disfrutas y te dejas querer." },
+            { t: "Vale por 1 Masaje", d: "Sesión completa de relax para quitarte todo el cansancio." },
+            { t: "Tarde de Películas", d: "Tú eliges la serie o peli, yo pongo los snacks y los mimos." },
+            { t: "Vale por 1000 Besos", d: "Canjeable en cualquier momento, lugar y circunstancia." },
+            { t: "Día de Consentirte", d: "Un día entero donde tú mandas y yo te cumplo cada deseo." },
+            { t: "Paz de Oro 🤝", d: "Pausa automática en cualquier discusión. Nos damos un abrazo de 1 minuto y volvemos a hablar tranquilos." },
+            { t: "Tengo la Razón 🏆", d: "Ganas el argumento automáticamente, sin preguntas ni reclamos. Úsalo con sabiduría por esta vez." },
+            { t: "Borrón y Cuenta Nueva 🔄", d: "Dejamos el enojo atrás en este mismísimo instante y lo solucionamos con mimos y comida rica." },
+            { t: "Disculpa y un Antojo 🍫", d: "Válido para cuando yo tenga la culpa. Viene con una disculpa sincera y tu chocolate o comida favorita." },
+            { t: "Abrazo Rompe-Orgullo 🫂", d: "No importa qué tan enojados estemos, estás obligado/a a dejarte abrazar fuerte hasta que se nos pase." },
+            { t: "Noche de Estreno 🔥", d: "Tú eliges la fantasía, la posición o el lugar hoy. Yo me entrego por completo a tus deseos." },
+            { t: "Ronda Relámpago ⚡", d: "Un 'rapidito' salvaje en el momento y lugar discreto que tú decidas." },
+            { t: "Masaje con Final Feliz 🤤", d: "Empieza relajante para quitar la tensión de la rutina... y termina de la manera más candente." },
+            { t: "Tú Mandas en la Cama 👑", d: "Esta noche llevas el control absoluto en la intimidad. Yo solo sigo tus instrucciones." },
+            { t: "Ducha para Dos 🧼", d: "Entramos juntos al baño y dejamos que el agua caliente y la pasión hagan lo suyo." },
+            { t: "Canje por una Chupada 🫦", d: "Una chupada intensa. Hasta el culo, con escupo incluido." },
+            { t: "Desayuno a la Cama ☕", d: "Te despierto con el olorcito a café y tu desayuno favorito listo para disfrutar sin moverte de la cama." },
+            { t: "Pase Libre de Tareas 🧹", d: "Hoy me encargo yo de absolutamente todo lo que toque limpiar o hacer en la casa. Tú descansas." },
+            { t: "Vale por un Capricho 🛍️", d: "Válido para ir a ese lugar que tanto quieres o comprar ese antojo del que llevas días hablando." },
+            { t: "Escapada Espontánea 🚗", d: "Preparamos una mochila rápida y nos vamos a pasear a donde nos lleve el viento hoy mismo." }
+        ];
 
         const preguntasTrivia = [
-            {
-                q: "¿Qué serie de anime es mi favorita? 🤔",
-                options: ["One Piece", "Hunter X Hunter", "Dragon Ball", "Pokemon"],
-                correct: 1
-            },
-            {
-                q: "¿Cuál es la canción que siempre me hace pensar en ti? 🎵",
-                options: ["Una de reggaetón viejo", "Una balada súper romántica", "Cualquiera... ¡porque siempre pienso en ti!", "Esa que pusimos en el primer viaje"],
-                correct: 2
-            },
-            {
-                q: "Si mañana ganamos un viaje con todo pagado, ¿a dónde nos iríamos de inmediato? ✈️",
-                options: ["A una playa del Caribe", "Recorrer Japón 🇯🇵", "A recorrer Europa en tren", "A acampar al sur"],
-                correct: 1
-            },
-            {
-                q: "¿Que me gusta comer mas? 🤭",
-                options: ["Chocolate", "Pastelitos", "Tu Panocha", "Lasaña"],
-                correct: 2
-            },
-            {
-                q: "De todo lo que hemos comido juntos, ¿cuál fue nuestro mayor 'antojo' inolvidable? 🍔",
-                options: ["Unos completos gigantes", "El tiramisú en caja", "Un sushi que pedimos de noche", "La hamburguesa de Pucón 🏔️"],
-                correct: 3
-            }
+            { q: "¿Qué serie de anime es mi favorita? 🤔", options: ["One Piece", "Hunter X Hunter", "Dragon Ball", "Pokemon"], correct: 1 },
+            { q: "¿Cuál es la canción que siempre me hace pensar en ti? 🎵", options: ["Una de reggaetón viejo", "Una balada súper romántica", "Cualquiera... ¡porque siempre pienso en ti!", "Esa que pusimos en el primer viaje"], correct: 2 },
+            { q: "Si mañana ganamos un viaje con todo pagado, ¿a dónde nos iríamos de inmediato? ✈️", options: ["A una playa del Caribe", "Recorrer Japón 🇯🇵", "A recorrer Europa en tren", "A acampar al sur"], correct: 1 },
+            { q: "¿Que me gusta comer mas? 🤭", options: ["Chocolate", "Pastelitos", "Tu Panocha", "Lasaña"], correct: 2 },
+            { q: "De todo lo que hemos comido juntos, ¿cuál fue nuestro mayor 'antojo' inolvidable? 🍔", options: ["Unos completos gigantes", "El tiramisú en caja", "Un sushi que pedimos de noche", "La hamburguesa de Pucón 🏔️"], correct: 3 }
         ];
 
         let gameLoop, activeItems = [], obstacles = [];
         let isJumping = false, currentScore = 0, isGameWon = false;
         let triviaIndex = 0, triviaLives = 3;
+
+        // Variables Snake
+        let snake = [], food = {x:0, y:0}, dx = 1, dy = 0, snakeScore = 0;
+        const gridSize = 15;
 
         function showView(viewId) {
             document.querySelectorAll('[id^="view-"]').forEach(v => v.style.display = 'none');
@@ -324,12 +318,10 @@
             
             document.getElementById('modal-victory').classList.add('hidden');
             document.getElementById('modal-gameover').classList.add('hidden');
-            document.getElementById('modal-victory').classList.remove('flex');
-            document.getElementById('modal-gameover').classList.remove('flex');
         }
 
         function openLetter(type) {
-             const content = {
+              const content = {
                 'amor': { 
                     title: '7 Meses a tu lado', 
                     body: `
@@ -358,6 +350,7 @@
                     sig: 'Tu amor eterno ❤️' 
                 }
             };
+
             document.getElementById('l-title').innerText = content[type].title;
             document.getElementById('l-body').innerHTML = content[type].body;
             document.getElementById('l-sig').innerText = content[type].sig;
@@ -371,6 +364,7 @@
             if(gameId === 'memory') startMemory();
             else if(gameId === 'trivia') startTrivia();
             else if(gameId === 'runner') startRunner();
+            else if(gameId === 'snake') startSnake();
         }
 
         /* LÓGICA: MEMORIA */
@@ -404,62 +398,37 @@
 
         /* LÓGICA: TRIVIA */
         function startTrivia() {
-            triviaIndex = 0;
-            triviaLives = 3;
-            isGameWon = false;
+            triviaIndex = 0; triviaLives = 3; isGameWon = false;
             renderTriviaQuestion();
         }
 
         function renderTriviaQuestion() {
             if(isGameWon) return;
-
             document.getElementById('trivia-progress').innerText = `${triviaIndex + 1}/${preguntasTrivia.length}`;
             document.getElementById('trivia-lives').innerText = '❤️'.repeat(triviaLives);
-
             const currentQ = preguntasTrivia[triviaIndex];
             document.getElementById('trivia-question-text').innerText = currentQ.q;
-
-            const container = document.getElementById('trivia-options-container');
-            container.innerHTML = '';
-
+            const container = document.getElementById('trivia-options-container'); container.innerHTML = '';
             currentQ.options.forEach((option, index) => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left p-4 rounded-xl text-sm transition-all duration-300 trivia-option block font-serif";
                 btn.innerText = option;
-                
                 btn.onclick = () => {
                     const allButtons = container.querySelectorAll('button');
                     allButtons.forEach(b => b.disabled = true);
-
                     if (index === currentQ.correct) {
-                        btn.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
-                        btn.style.borderColor = "#10b981";
-                        btn.innerHTML = `${option} ✨`;
-                        
+                        btn.style.backgroundColor = "rgba(16, 185, 129, 0.2)"; btn.style.borderColor = "#10b981";
                         setTimeout(() => {
                             triviaIndex++;
-                            if (triviaIndex >= preguntasTrivia.length) {
-                                isGameWon = true;
-                                win();
-                            } else {
-                                renderTriviaQuestion();
-                            }
+                            if (triviaIndex >= preguntasTrivia.length) { isGameWon = true; win(); } 
+                            else { renderTriviaQuestion(); }
                         }, 1000);
                     } else {
-                        btn.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
-                        btn.style.borderColor = "#ef4444";
-                        btn.innerHTML = `${option} ❌`;
-                        
-                        allButtons[currentQ.correct].style.borderColor = "#c5a059";
-                        allButtons[currentQ.correct].style.backgroundColor = "rgba(197, 160, 89, 0.1)";
-
+                        btn.style.backgroundColor = "rgba(239, 68, 68, 0.2)"; btn.style.borderColor = "#ef4444";
                         setTimeout(() => {
                             triviaLives--;
-                            if (triviaLives <= 0) {
-                                gameOver();
-                            } else {
-                                renderTriviaQuestion();
-                            }
+                            if (triviaLives <= 0) { gameOver(); } 
+                            else { renderTriviaQuestion(); }
                         }, 1200);
                     }
                 };
@@ -472,81 +441,96 @@
             currentScore = 0; obstacles = []; isJumping = false; isGameWon = false;
             const arena = document.getElementById('game-runner').querySelector('#game-canvas-area');
             const player = document.getElementById('runner-player');
-            player.style.bottom = "20px";
-            
-            player.classList.add('running-animation');
-            player.style.backgroundPosition = '0px -204px';
-            
+            player.style.bottom = "20px"; player.classList.add('running-animation');
             let lastObsTime = 0;
-            
             gameLoop = setInterval(() => {
                 if(isGameWon) return;
-                
-                currentScore += 5; 
-                document.getElementById('run-score').innerText = currentScore;
-                
-                if(currentScore >= 1000) { 
-                    isGameWon = true;
-                    obstacles.forEach(o => o.remove());
-                    obstacles = [];
-                    win(); 
-                    return; 
-                }
-                
+                currentScore += 5; document.getElementById('run-score').innerText = currentScore;
+                if(currentScore >= 1000) { isGameWon = true; win(); return; }
                 const now = Date.now();
                 if (now - lastObsTime > 1200 && Math.random() < 0.18) {
                     const obs = document.createElement('div'); obs.className = 'obstacle';
                     obs.innerHTML = ['👻','🌩️','🧱','💨'][Math.floor(Math.random()*4)];
-                    obs.style.left = arena.offsetWidth + 'px'; 
-                    arena.appendChild(obs); 
-                    obstacles.push(obs);
+                    obs.style.left = arena.offsetWidth + 'px'; arena.appendChild(obs); obstacles.push(obs);
                     lastObsTime = now;
-                    
                     let oPos = arena.offsetWidth;
                     const moveObs = setInterval(() => {
                         if(isGameWon) { obs.remove(); clearInterval(moveObs); return; }
-                        
-                        oPos -= 7; 
-                        obs.style.left = oPos + 'px';
-                        
+                        oPos -= 7; obs.style.left = oPos + 'px';
                         const pR = player.getBoundingClientRect(), oR = obs.getBoundingClientRect();
                         if (pR.right > oR.left + 10 && pR.left < oR.right - 10 && pR.bottom > oR.top + 8) { 
-                            if(!isGameWon) gameOver(); 
-                            clearInterval(moveObs); 
+                            if(!isGameWon) gameOver(); clearInterval(moveObs); 
                         }
-                        
                         if (oPos < -60) { obs.remove(); clearInterval(moveObs); }
-                        if (document.getElementById('view-arena').style.display === 'none') { obs.remove(); clearInterval(moveObs); }
                     }, 20);
                 }
             }, 50);
         }
 
-        /* MANEJO DE SALTO CON CAMBIO DE TEXTURA EXACTA */
         function runnerJump() {
             if (isJumping || isGameWon) return;
             isJumping = true;
-            
             const player = document.getElementById('runner-player');
             player.classList.remove('running-animation');
-            
-            /* Cuadro del salto con brazos abiertos (Fila 3, última columna) */
             player.style.backgroundPosition = '-200px -136px'; 
-
             let h = 20, v = 15, g = 0.8;
             const jumpInt = setInterval(() => {
                 if(isGameWon) { clearInterval(jumpInt); return; }
                 v -= g; h += v;
-                if (h <= 20) { 
-                    h = 20; 
-                    clearInterval(jumpInt); 
-                    isJumping = false; 
-                    player.classList.add('running-animation');
-                    /* Al caer, regresa al cuadro fijo de pie automáticamente */
-                    player.style.backgroundPosition = '0px -204px';
-                }
+                if (h <= 20) { h = 20; clearInterval(jumpInt); isJumping = false; player.classList.add('running-animation'); }
                 player.style.bottom = h + 'px';
             }, 20);
+        }
+
+        /* LÓGICA: SNAKE (Atraviesa paredes) */
+        function startSnake() {
+            const canvas = document.getElementById('snake-canvas-area');
+            const ctx = canvas.getContext('2d');
+            snake = [{x: 10, y: 10}];
+            snakeScore = 0; dx = 1; dy = 0;
+            spawnFood();
+            
+            gameLoop = setInterval(() => {
+                let nextX = snake[0].x + dx;
+                let nextY = snake[0].y + dy;
+
+                // Teletransporte si toca la pared
+                if (nextX < 0) nextX = 19;
+                if (nextX >= 20) nextX = 0;
+                if (nextY < 0) nextY = 19;
+                if (nextY >= 20) nextY = 0;
+
+                const head = {x: nextX, y: nextY};
+                
+                // Solo pierde si choca consigo misma
+                if (snake.some(s => s.x === head.x && s.y === head.y)) {
+                    gameOver(); return;
+                }
+                
+                snake.unshift(head);
+                if (head.x === food.x && head.y === food.y) {
+                    snakeScore++;
+                    document.getElementById('snake-score').innerText = snakeScore;
+                    if(snakeScore >= 20) { win(); return; }
+                    spawnFood();
+                } else {
+                    snake.pop();
+                }
+                
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,300,300);
+                ctx.fillStyle = '#c5a059';
+                snake.forEach(s => ctx.fillRect(s.x*15, s.y*15, 14, 14));
+                ctx.fillStyle = '#ff4d4d'; ctx.fillText('❤️', food.x*15, food.y*15 + 12);
+            }, 150);
+        }
+
+        function spawnFood() {
+            food = { x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20) };
+        }
+
+        function setSnakeDir(x, y) {
+            if ((x === -dx && dx !== 0) || (y === -dy && dy !== 0)) return;
+            dx = x; dy = y;
         }
 
         function win() {
@@ -557,7 +541,6 @@
             document.getElementById('v-desc').innerText = v.d;
             document.getElementById('modal-victory').classList.remove('hidden');
             document.getElementById('modal-victory').classList.add('flex');
-            document.getElementById('modal-gameover').classList.add('hidden'); 
         }
 
         function gameOver() { 
@@ -573,7 +556,6 @@
             window.open(`https://wa.me/${MI_NUMERO}?text=${encodeURIComponent(text)}`, '_blank');
         }
 
-        /* EFECTO DE PARTICULAS */
         setInterval(() => {
             if (document.getElementById('view-selection').style.display !== 'none') {
                 const p = document.createElement('div'); p.className = 'particle';
