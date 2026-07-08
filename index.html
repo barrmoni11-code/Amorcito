@@ -1,3 +1,6 @@
+Aquí tienes el código HTML con la nueva carta agregada exactamente donde corresponde en el listado de cartas (`openLetter`), manteniendo el formato intacto, e incluyendo una nueva opción en la selección principal con su respectiva imagen:
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -159,6 +162,11 @@
             <div class="gift-card" onclick="openLetter('tormenta')">
                 <img src="https://static.vecteezy.com/system/resources/thumbnails/047/830/713/small_2x/dynamic-illustration-of-a-lightning-storm-within-a-dense-cloud-formation-showcasing-powerful-weather-elements-png.png" alt="Tormenta" class="gift-img">
                 <div class="font-hand text-blue-300 text-2xl">En nuestras tormentas ⛈️</div>
+            </div>
+
+            <div class="gift-card" onclick="openLetter('nueve_meses')">
+                <img src="https://png.pngtree.com/png-vector/20240309/ourmid/pngtree-golden-heart-gift-box-valentines-day-gift-box-3d-rendering-png-image_11921345.png" alt="9 meses" class="gift-img">
+                <div class="font-hand text-pink-300 text-2xl">Felices 9 meses 💖</div>
             </div>
 
             <div class="gift-card flex flex-col items-center justify-center" onclick="showView('view-games')">
@@ -348,6 +356,16 @@
                         <p>Te amo en la calma, te amo en la tormenta, hoy, mañana y para siempre.</p>
                     `, 
                     sig: 'Tu amor eterno ❤️' 
+                },
+                'nueve_meses': {
+                    title: 'Mi amor, felices 9 meses',
+                    body: `
+                        <p>Hoy nos detengo un momento en el tiempo para mirar lo que hemos construido en estos 9 meses. No es solo el tiempo que ha pasado, sino lo profundo que has calado en mi vida. Al ver todo lo que eres, lo que vales y lo fuerte que has tenido que ser, mi único deseo es abrazarte y no soltarte.</p>
+                        <p>Sé que el camino no siempre ha sido fácil para ti. Sé que la vida te obligó a levantar muros, a sanar en silencio y a ser tu propio refugio durante mucho tiempo. Pero hoy quiero pedirte que dejes caer los brazos, que respires hondo y sientas paz. Ya no tienes por qué estar sola. <span class="highlight">Me tienes a mí.</span></p>
+                        <p>No te lo digo como una frase bonita, sino como una promesa de vida. Estoy aquí para sostenerte cuando sientas que te faltan las fuerzas, para recordarte lo increíble que eres cuando tú lo olvides, y para cuidar tu corazón como el tesoro más sagrado que tengo. Ya no tienes que cargar con el peso del mundo sobre tus hombros; ahora somos un equipo, y tus batallas, tus miedos y tus sueños los caminamos juntos.</p>
+                        <p>Gracias por estos 9 meses de elegirme, por permitirme conocer tu alma y por darme el privilegio de amarte. Estar a tu lado es el lugar más seguro y feliz del mundo.</p>
+                    `,
+                    sig: 'Te amo con toda mi alma, hoy y cada uno de los días que nos esperan. ❤️'
                 }
             };
 
@@ -568,3 +586,5 @@
     </script>
 </body>
 </html>
+
+```
